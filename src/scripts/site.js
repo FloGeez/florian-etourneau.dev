@@ -406,7 +406,10 @@ const tir = (() => {
     const [wx, wy, n] = vitesse(pointScene(e)); prise = null; svg.classList.remove('vise'); visee.setAttribute('hidden', '');
     if (n > 90 && e.type !== 'pointercancel') lacher(wx, wy); else { orienter(0); tenir(); }
   }
+  // au doigt, le navigateur prendrait le geste pour un défilement (touch-action n’agit pas dans un SVG) : on le bloque dès le toucher du ballon
+  const bloquer = (e) => { if ((etat === 'main' && !parti) || prise) e.preventDefault(); };
   [ballon, document.getElementById('tireur')].forEach((el) => {
+    el.addEventListener('touchstart', bloquer, { passive: false }); el.addEventListener('touchmove', bloquer, { passive: false });
     el.addEventListener('pointerdown', debut); el.addEventListener('pointermove', bouge);
     el.addEventListener('pointerup', fin); el.addEventListener('pointercancel', fin);
   });
