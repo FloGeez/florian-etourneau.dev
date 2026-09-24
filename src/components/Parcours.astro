@@ -1,0 +1,15 @@
+---
+import { parcours } from '../data/parcours';
+---
+  <section class="section" id="parcours" aria-labelledby="t-parcours">
+    <div class="enveloppe section-grille grille-large">
+      <div class="repere-section"><h2 id="t-parcours">parcours</h2><p class="legende">Un oiseau posé = deux mois passés.</p></div>
+      <div>
+        <ol class="parcours">
+          {parcours.map((p) => (
+            <li data-annees={p.annees}><span class="annees">{p.periode}</span><span class="poste">{p.poste}</span><span class="boite">{p.boite}</span></li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>

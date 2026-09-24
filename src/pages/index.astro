@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import Entete from '../components/Entete.astro';
+import Accueil from '../components/Accueil.astro';
+import Maintenant from '../components/Maintenant.astro';
+import Parcours from '../components/Parcours.astro';
+import Pied from '../components/Pied.astro';
+---
+<Base>
+  <Entete />
+  <main id="contenu">
+    <Accueil />
+    <Maintenant />
+    <Parcours />
+  </main>
+  <Pied />
+</Base>

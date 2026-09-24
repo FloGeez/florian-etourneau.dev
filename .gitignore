@@ -1,0 +1,22 @@
+# build
+dist/
+.astro/
+
+# dépendances
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# environnement
+.env
+.env.*
+!.env.example
+
+# systèmes / éditeurs
+.DS_Store
+Thumbs.db
+.idea/
+.vercel/

@@ -1,0 +1,20 @@
+{
+  "name": "florian-etourneau.dev",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site personnel de Florian Etourneau",
+  "author": "Florian Etourneau",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^7.3.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
