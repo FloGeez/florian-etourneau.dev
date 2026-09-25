@@ -271,16 +271,20 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .envoyer { background: var(--fe-primary); border-color: var(--fe-primary); color: var(--fe-on-primary); }
 .envoyer:hover { background: var(--fe-primary-hover); border-color: var(--fe-primary-hover); }
 .envoyer:disabled { cursor: progress; }
-/* Moment 06 « Message envoyé » : l’oiseau part avec l’enveloppe, la confirmation reste dessous */
-.envoi { max-width: 760px; margin: 24px 0 0; }
+/* Moment 08 « Message envoyé » : le formulaire se plie en enveloppe, un oiseau la prend en vol (scripts/contact.js) */
+.contact-zone { overflow: hidden; margin: 0 -6px; padding: 0 6px; }
+.formulaire > * { transition: opacity .2s ease-out; }
+.formulaire.se-plie > * { opacity: 0; }
+.envoi { max-width: 760px; margin: 32px 0 0; }
 .envoi[hidden] { display: none; }
-.envoi-scene { display: block; width: 100%; height: auto; overflow: visible; }
-.envoi-trace circle { fill: var(--fe-text-muted); opacity: .45; }
-.envoi-lettre { fill: var(--fe-surface); stroke: var(--fe-text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .envoi-texte { margin: 0; font: 700 20px var(--fe-font-titre); color: var(--fe-text); }
 .envoi-texte:focus { outline: none; }
 .envoi-texte span { font: 400 16px var(--fe-font-titre); color: var(--fe-text-muted); }
-@media (prefers-reduced-motion: reduce) { .envoi-scene { display: none; } }
+.envoi-vol { position: absolute; left: 0; top: 0; z-index: 2; overflow: visible; pointer-events: none; }
+.envoi-vol[hidden] { display: none; }
+.envoi-trace circle { fill: var(--fe-text-muted); }
+#envoi-feuille { fill: var(--fe-surface); stroke: var(--fe-text); stroke-width: 2; }
+.envoi-rabat { fill: none; stroke: var(--fe-text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; }
 .ecrire[aria-expanded="true"] { border-color: var(--fe-primary); color: var(--fe-primary); }
 .ecrire[hidden] { display: none; }
 .statut-copie { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

@@ -6,6 +6,8 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   site: 'https://florian-etourneau.dev',
   adapter: vercel(),
+  // Le build écrit dans .vercel/ : le serveur de dev ne doit pas recharger la page pour autant.
+  vite: { server: { watch: { ignored: ['**/.vercel/**'] } } },
   env: {
     schema: {
       // Clé API Resend, à déclarer dans Vercel (Settings → Environment Variables) et dans .env en local.
