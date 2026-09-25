@@ -2,6 +2,7 @@
 import { createNuee } from './nuee.js';
 import { initTheme } from './theme.js';
 import { FORMES, echantillon, minuteRennes } from './formes.js';
+import { initContact } from './contact.js';
 
 const root = document.documentElement;
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -404,3 +405,5 @@ copier.addEventListener('click', () => {
   const repli = () => { const sel = getSelection(), r = document.createRange(); r.selectNodeContents(adresse); sel.removeAllRanges(); sel.addRange(r); confirmer('Sélectionnée'); };
   try { navigator.clipboard.writeText(adresse.textContent.trim()).then(() => confirmer('Copié'), repli); } catch (err) { repli(); }
 });
+
+initContact(document.getElementById('formulaire'), document.getElementById('ecrire'), document.getElementById('envoi'));

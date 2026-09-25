@@ -249,6 +249,40 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .copier.copie .coche-trace { animation: coche-trace .7s cubic-bezier(.5,0,.3,1) forwards; }
 .coche-ballon { offset-path: path('M4 11 L9.5 16.5 L20 5'); offset-distance: 0%; offset-rotate: 0deg; opacity: 0; }
 .copier.copie .coche-ballon { animation: coche-ballon .7s cubic-bezier(.5,0,.3,1) forwards, coche-ballon-fin .3s .7s ease-out forwards; }
+/* Formulaire de contact (charte, planche « Premiers composants ») : replié sous l’adresse, deux colonnes, message pleine largeur */
+.formulaire { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; max-width: 760px; margin: 32px 0 0; }
+.formulaire[hidden] { display: none; }
+.formulaire .large { grid-column: 1 / -1; }
+@media (max-width: 600px) { .formulaire { grid-template-columns: 1fr; } }
+.champ { display: flex; flex-direction: column; gap: 6px; }
+.champ label { font: 700 14px var(--fe-font-titre); color: var(--fe-text); }
+/* 16 px (la charte dit 15) : en dessous, Safari iOS zoome sur le champ */
+.champ input, .champ textarea { width: 100%; min-height: 44px; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: var(--fe-surface); color: var(--fe-text); font: inherit; font-weight: 400; font-size: 16px; line-height: 1.5; }
+.champ textarea { resize: vertical; min-height: 116px; }
+.champ input:focus-visible, .champ textarea:focus-visible { border-radius: 10px; }
+.champ [aria-invalid] { border-color: var(--fe-danger); }
+.aide { font-size: 13px; color: var(--fe-danger); }
+.aide:empty { display: none; }
+.pot-de-miel { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.formulaire-bas { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 20px; }
+.statut-envoi { flex: 1 1 240px; margin: 0; font-size: 16px; color: var(--fe-text-muted); }
+.statut-envoi[data-etat="ok"] { color: var(--fe-success); }
+.statut-envoi[data-etat="erreur"] { color: var(--fe-danger); }
+.envoyer { background: var(--fe-primary); border-color: var(--fe-primary); color: var(--fe-on-primary); }
+.envoyer:hover { background: var(--fe-primary-hover); border-color: var(--fe-primary-hover); }
+.envoyer:disabled { cursor: progress; }
+/* Moment 06 « Message envoyé » : l’oiseau part avec l’enveloppe, la confirmation reste dessous */
+.envoi { max-width: 760px; margin: 24px 0 0; }
+.envoi[hidden] { display: none; }
+.envoi-scene { display: block; width: 100%; height: auto; overflow: visible; }
+.envoi-trace circle { fill: var(--fe-text-muted); opacity: .45; }
+.envoi-lettre { fill: var(--fe-surface); stroke: var(--fe-text); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.envoi-texte { margin: 0; font: 700 20px var(--fe-font-titre); color: var(--fe-text); }
+.envoi-texte:focus { outline: none; }
+.envoi-texte span { font: 400 16px var(--fe-font-titre); color: var(--fe-text-muted); }
+@media (prefers-reduced-motion: reduce) { .envoi-scene { display: none; } }
+.ecrire[aria-expanded="true"] { border-color: var(--fe-primary); color: var(--fe-primary); }
+.ecrire[hidden] { display: none; }
 .statut-copie { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @keyframes coche-trace { to { stroke-dashoffset: 0; } }
 @keyframes coche-ballon { 0% { offset-distance: 0%; opacity: 1; } 100% { offset-distance: 100%; opacity: 1; } }
