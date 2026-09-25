@@ -1,7 +1,8 @@
 # florian-etourneau.dev
 
 Site personnel de Florian Etourneau : une page, une nuée d’étourneaux, un panier de basket.
-Construit avec [Astro](https://astro.build), sans framework côté client.
+Construit avec [Astro](https://astro.build), sans framework côté client. Page statique, sauf
+le formulaire de contact : une fonction Vercel qui envoie le message par [Resend](https://resend.com).
 
 ## Démarrer
 
@@ -11,6 +12,14 @@ npm run dev       # http://localhost:4321
 npm run build     # génère dist/
 npm run preview   # sert dist/ en local
 ```
+
+Pour tester l’envoi du formulaire en local, créer un fichier `.env` (hors git) :
+
+```sh
+RESEND_API_KEY=re_…
+```
+
+Sans clé, le formulaire répond que l’envoi n’est pas configuré et renvoie vers l’adresse email.
 
 Node 22.12 ou plus récent.
 
@@ -34,11 +43,13 @@ src/
     theme.js               la bascule de thème
     site.js                chorégraphie de la nuée, tir, envol, heure, famille, copier
     air-ball.js            l’animation de la page 404
+    contact.js             envoi du formulaire sans rechargement
   styles/
     tokens.css             copie des tokens de la charte — ne pas modifier ici
     global.css             styles du site, uniquement à partir des tokens
   pages/index.astro        assemble la page
   pages/404.astro          « Air ball » : la page introuvable
+  pages/api/contact.ts     envoi du formulaire par Resend (seule route serveur)
 outils/copier-tokens.mjs   (local, hors git) recopie tokens.css depuis ../etourneau-identite
 ```
 
@@ -51,7 +62,9 @@ côté charte, lancer `node outils/copier-tokens.mjs` (outil local, hors git : i
 
 ## Déploiement
 
-Vercel (preset Astro détecté automatiquement) : chaque push sur `main` part en production,
+Vercel, avec l’adaptateur `@astrojs/vercel`. Variable d’environnement à déclarer :
+`RESEND_API_KEY`. Le domaine `florian-etourneau.dev` doit être vérifié dans Resend
+(l’expéditeur est `contact@florian-etourneau.dev`) : chaque push sur `main` part en production,
 chaque branche a sa preview. Domaine : `florian-etourneau.dev`.
 
 ## À faire
