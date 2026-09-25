@@ -1,12 +1,40 @@
 /* Formulaire de contact : replié sous l’adresse, « Écrire un message » le déplie. Envoi sans recharger la page.
    Au succès, moment 08 de la charte « Message envoyé » : le formulaire se replie en enveloppe, un oiseau arrive
    de la gauche, la saisit en vol et disparaît à droite ; la confirmation prend la place du formulaire.
-   Sans animation : le texte seul. Sans JS, le bouton et le formulaire restent masqués : l’adresse suffit. */
+   Sans animation : le texte seul. Sans JS, le bouton et le formulaire restent masqués : l’adresse suffit.
+   L’envoi passe par l’action Astro `contact` (src/actions/index.ts), protégée par ALTCHA. */
+import { actions, isInputError } from 'astro:actions';
+import { solveChallenge } from 'altcha-lib';
+import { deriveKey } from 'altcha-lib/algorithms/web/pbkdf2';
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ECHEC = 'L’envoi a échoué. Réessaie, ou écris-moi directement à l’adresse ci-dessus.';
 const reduit = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Même règles que le serveur (src/pages/api/contact.ts), pour répondre sans attendre.
+/* ——— ALTCHA (anti-robot, sans service tiers) ———
+   À l’ouverture du formulaire, le serveur donne un défi signé ; le navigateur le résout en arrière-plan pendant
+   que le visiteur écrit (moins d’une seconde sur ordinateur, avec WebCrypto). La solution part avec le message.
+   Elle ne sert qu’une fois : on en prépare une nouvelle après chaque envoi. */
+let preuve = null; // Promise<string> : { challenge, solution } en JSON, ou '' si la protection n’est pas configurée
+function preparerPreuve() {
+  preuve = (async () => {
+    const { data: challenge, error } = await actions.defi();
+    if (error || !challenge) return '';
+    const solution = await solveChallenge({ challenge, deriveKey, timeout: 60000 });
+    return solution ? JSON.stringify({ challenge, solution }) : '';
+  })().catch(() => '');
+}
+async function prendrePreuve() {
+  if (!preuve) preparerPreuve();
+  let charge = await preuve;
+  // Formulaire ouvert depuis longtemps : le défi va expirer, on en résout un neuf.
+  const expire = charge && JSON.parse(charge).challenge.parameters.expiresAt;
+  if (expire && expire - Date.now() / 1000 < 60) { preparerPreuve(); charge = await preuve; }
+  preuve = null;
+  return charge;
+}
+
+// Mêmes règles que l’action (src/actions/index.ts), pour répondre sans attendre.
 function verifier(f) {
   const nom = f.nom.value.trim(), email = f.email.value.trim(), message = f.message.value.trim();
   if (!nom) return ['nom', 'Indique ton nom.'];
@@ -134,7 +162,7 @@ export function initContact(formulaire, ouvrir, envoi) {
     const ouvert = formulaire.hidden;
     formulaire.hidden = !ouvert; envoi.hidden = true;
     ouvrir.setAttribute('aria-expanded', String(ouvert));
-    if (ouvert) formulaire.elements.nom.focus();
+    if (ouvert) { if (!preuve) preparerPreuve(); formulaire.elements.nom.focus(); }
   });
   // Une erreur disparaît dès qu’on corrige le champ.
   formulaire.addEventListener('input', (e) => { if (e.target.hasAttribute('aria-invalid')) marquer(e.target.name); });
@@ -147,20 +175,22 @@ export function initContact(formulaire, ouvrir, envoi) {
     if (faute) { marquer(...faute); formulaire.elements[faute[0]].focus(); return; }
 
     bouton.disabled = true; libelle.textContent = 'Envoi…';
-    let resultat = { ok: false, erreur: ECHEC };
-    try {
-      const reponse = await fetch(formulaire.action, { method: 'POST', body: new FormData(formulaire), headers: { Accept: 'application/json' } });
-      resultat = await reponse.json();
-    } catch (err) { /* réseau coupé : on garde le message par défaut */ }
+    const donnees = new FormData(formulaire);
+    donnees.set('altcha', await prendrePreuve());
+    let erreur;
+    try { ({ error: erreur } = await actions.contact(donnees)); } catch (err) { erreur = { message: ECHEC }; }
+    preparerPreuve(); // la suivante, prête pour un éventuel nouvel envoi
     libelle.textContent = 'Envoyer'; bouton.disabled = false;
 
-    if (resultat.ok) {
+    if (!erreur) {
       if (reduit() || !scene || !pied) { confirmer(); return; }
       enVol = true;
       envolEnveloppe({ pied, formulaire, scene, fin: () => { confirmer(); setTimeout(() => { enVol = false; }, 600); } });
       return;
     }
-    if (resultat.champ && formulaire.elements[resultat.champ]) { marquer(resultat.champ, resultat.erreur); formulaire.elements[resultat.champ].focus(); }
-    else annoncer(resultat.erreur || ECHEC, 'erreur');
+    // Erreur de saisie renvoyée par le schéma de l’action : on l’affiche sous le champ concerné.
+    const champ = isInputError(erreur) ? ['nom', 'email', 'message'].find((n) => erreur.fields[n]?.length) : null;
+    if (champ) { marquer(champ, erreur.fields[champ][0]); formulaire.elements[champ].focus(); }
+    else annoncer(erreur.message || ECHEC, 'erreur');
   });
 }
