@@ -37,6 +37,31 @@ async function humain(charge: string | undefined) {
   return true;
 }
 
+/* ——— Limites d’envoi ———
+   3 messages par heure et par adresse IP, 20 par jour en tout (le quota gratuit de Resend est de 100).
+   Comptés en mémoire de la fonction : approximatif (tout repart de zéro quand Vercel la redémarre, et chaque
+   instance compte de son côté), mais cela arrête un robot lancé en boucle. Seuls les envois réussis comptent. */
+const HEURE = 60 * 60 * 1000, JOUR = 24 * HEURE;
+const PAR_IP = 3, PAR_JOUR = 20;
+const envoisParIp = new CappedMap<string, number[]>({ maxSize: 5000 });
+let envoisDuJour: number[] = [];
+const recents = (liste: number[] = [], duree: number) => liste.filter((t) => Date.now() - t < duree);
+function limite(ip: string) {
+  envoisDuJour = recents(envoisDuJour, JOUR);
+  if (envoisDuJour.length >= PAR_JOUR) return 'Beaucoup de messages aujourd’hui : réessaie demain, ou écris-moi directement à l’adresse ci-dessus.';
+  if (recents(envoisParIp.get(ip), HEURE).length >= PAR_IP) return 'Tu as déjà envoyé plusieurs messages : réessaie dans une heure, ou écris-moi directement à l’adresse ci-dessus.';
+  return null;
+}
+function compter(ip: string) {
+  envoisDuJour.push(Date.now());
+  envoisParIp.set(ip, [...recents(envoisParIp.get(ip), HEURE), Date.now()]);
+}
+// Adresse du visiteur : fournie par l’adaptateur Vercel, sinon l’en-tête du proxy.
+function adresse(contexte: { clientAddress: string; request: Request }) {
+  try { if (contexte.clientAddress) return contexte.clientAddress; } catch { /* indisponible selon l’environnement */ }
+  return contexte.request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'inconnue';
+}
+
 export const server = {
   // Un défi neuf, ou null si la protection n’est pas configurée.
   defi: defineAction({
@@ -66,9 +91,11 @@ export const server = {
       // La solution ALTCHA : { challenge, solution } en JSON.
       altcha: z.string().max(4000).optional(),
     }),
-    handler: async (entree) => {
+    handler: async (entree, contexte) => {
       // Un robot a rempli le pot de miel : on fait comme si tout allait bien.
       if (entree.site) return { envoye: true };
+      const ip = adresse(contexte), trop = limite(ip);
+      if (trop) throw new ActionError({ code: 'TOO_MANY_REQUESTS', message: trop });
       if (!(await humain(entree.altcha))) {
         throw new ActionError({ code: 'FORBIDDEN', message: 'La vérification anti-robot n’a pas abouti. Réessaie dans un instant.' });
       }
@@ -93,6 +120,7 @@ export const server = {
         console.error('[contact] échec Resend', reponse?.status, await reponse?.text().catch(() => ''));
         throw new ActionError({ code: 'INTERNAL_SERVER_ERROR', message: `L’envoi a échoué. Réessaie, ou ${INJOIGNABLE}` });
       }
+      compter(ip);
       return { envoye: true };
     },
   }),
