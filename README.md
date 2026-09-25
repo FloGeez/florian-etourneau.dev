@@ -20,7 +20,7 @@ Node 22.12 ou plus récent.
 public/favicon/            icônes et manifest
 public/icons/              logos officiels GitHub et LinkedIn (menu mobile)
 src/
-  layouts/Base.astro       <head>, polices, favicon, thème, script du site
+  layouts/Base.astro       <head>, polices, favicon, thème mémorisé
   components/
     Entete.astro           logo, liens, bascule de thème
     Accueil.astro          accroche + scène du tir
@@ -29,14 +29,25 @@ src/
     Pied.astro             contact, heure et météo, la famille sur le fil
   data/parcours.ts         postes et durées (un oiseau = deux mois)
   scripts/
-    nuee.js                la murmuration (canvas fixe, coordonnées document)
-    site.js                thème, chorégraphie de la nuée, tir, heure, copier
-  styles/global.css        tokens de la charte + styles des sections
+    nuee.js                la nuée (canvas fixe, coordonnées document)
+    formes.js              les formes que dessine la nuée et leur échantillonnage
+    theme.js               la bascule de thème
+    site.js                chorégraphie de la nuée, tir, envol, heure, famille, copier
+    air-ball.js            l’animation de la page 404
+  styles/
+    tokens.css             copie des tokens de la charte — ne pas modifier ici
+    global.css             styles du site, uniquement à partir des tokens
   pages/index.astro        assemble la page
+  pages/404.astro          « Air ball » : la page introuvable
+outils/copier-tokens.mjs   (local, hors git) recopie tokens.css depuis ../etourneau-identite
 ```
 
 Les scripts sont des modules ES bundlés par Astro ; ils ciblent les éléments par `id`,
 donc garder les `id` des composants en cas de modification.
+
+La charte (dossier voisin `etourneau-identite`) est la source des couleurs, tailles et polices :
+aucune couleur en dur dans le site, tout passe par `--fe-*`. Après un changement de tokens
+côté charte, lancer `node outils/copier-tokens.mjs` (outil local, hors git : il lit le dossier voisin).
 
 ## Déploiement
 

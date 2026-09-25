@@ -1,4 +1,5 @@
 ---
+import '../styles/tokens.css';
 import '../styles/global.css';
 
 interface Props {
@@ -50,10 +51,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <a class="lien-evitement" href="#contenu">Aller au contenu</a>
-    <canvas class="nuee-page" id="nuee" aria-hidden="true"></canvas>
     <slot />
-    <script>
-      import '../scripts/site.js';
-    </script>
   </body>
 </html>

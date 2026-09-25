@@ -7,6 +7,7 @@ import Parcours from '../components/Parcours.astro';
 import Pied from '../components/Pied.astro';
 ---
 <Base>
+  <canvas class="nuee-page" id="nuee" aria-hidden="true"></canvas>
   <Entete />
   <main id="contenu">
     <Accueil />
@@ -14,4 +15,7 @@ import Pied from '../components/Pied.astro';
     <Parcours />
   </main>
   <Pied />
+  <script>
+    import '../scripts/site.js';
+  </script>
 </Base>

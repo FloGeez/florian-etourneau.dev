@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import Entete from '../components/Entete.astro';
+const annee = new Date().getFullYear();
+---
+<Base title="Air ball — Florian Etourneau" description="Cette page n’existe pas.">
+  <Entete accueil="/" />
+  <main id="contenu" class="enveloppe perdu">
+    <div class="perdu-texte">
+      <p class="surtitre">404 · page introuvable</p>
+      <h1>Air ball. <span class="deux">Cette page n’existe pas.</span></h1>
+      <p class="perdu-lien"><a href="/">Retour au terrain<svg class="pointe" viewBox="0 0 8 10" aria-hidden="true"><path d="M0 0 L8 5 L0 10 Z"/></svg></a></p>
+    </div>
+    <!-- Sur le cercle : l’oiseau perché sur l’arceau ; le tir, trop long, passe au-dessus de tout (air-ball.js). -->
+    <svg class="perdu-scene" viewBox="20 -10 250 262" role="img" aria-label="L’étourneau perché sur le cercle du panier ; le ballon passe au-dessus de tout sans rien toucher : un air ball.">
+      <g class="fe-filet" fill="none" stroke-width="2" stroke-linecap="round"><path d="M104 184 L116 236 M196 184 L184 236 M126 188 L132 236 M150 190 L150 236 M174 188 L168 236 M108 204 L150 210 L192 204 M112 222 L150 226 L188 222"/></g>
+      <rect class="fe-encre-f" x="228" y="100" width="9" height="110" rx="2"/>
+      <path class="fe-encre-s" d="M228 176 L200 182" stroke-width="5" stroke-linecap="round"/>
+      <g id="ab-ballon" transform="translate(196 40)">
+        <circle class="fe-ballon" r="16"/>
+        <g class="fe-couture" stroke-width="1.8"><path d="M-16 0 L16 0 M0 -16 L0 16"/><path d="M-11.2 -11.2 C-3.7 -3.7 -3.7 3.7 -11.2 11.2 M11.2 -11.2 C3.7 -3.7 3.7 3.7 11.2 11.2"/></g>
+      </g>
+      <g transform="translate(48,36) scale(0.84)">
+        <clipPath id="ab-clip"><path d="M140 48 C132 34 108 32 98 46 C88 60 86 80 84 100 C82 130 70 160 52 192 L68 194 C80 176 92 164 102 156 C130 146 150 120 146 88 C145 78 143 70 140 66 Z"/></clipPath>
+        <path class="fe-corps" d="M140 48 C132 34 108 32 98 46 C88 60 86 80 84 100 C82 130 70 160 52 192 L68 194 C80 176 92 164 102 156 C130 146 150 120 146 88 C145 78 143 70 140 66 Z"/>
+        <g clip-path="url(#ab-clip)"><path class="fe-ventre" d="M98 176 C100 136 120 108 164 98 L200 98 L200 200 L98 200 Z"/><path class="fe-aile" d="M94 62 C118 80 122 116 106 150 L56 198 C74 150 80 104 94 62 Z"/></g>
+        <path class="fe-bec" d="M138 49 L172 59 L139 65 Z"/>
+        <circle class="fe-oeil" cx="125" cy="54" r="4.6"/><circle class="fe-reflet" cx="126.6" cy="52.6" r="1.4"/>
+      </g>
+      <ellipse class="fe-cercle" cx="150" cy="182" rx="48" ry="7" fill="none" stroke-width="6"/>
+    </svg>
+  </main>
+  <footer class="enveloppe bas"><span>© {annee} Florian Etourneau</span></footer>
+  <script>
+    import { initTheme } from '../scripts/theme.js';
+    import { airBall } from '../scripts/air-ball.js';
+    initTheme();
+    airBall(document.getElementById('ab-ballon'));
+  </script>
+</Base>

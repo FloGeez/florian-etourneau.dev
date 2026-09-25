@@ -20,3 +20,6 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .vercel/
+
+# outils locaux (dépendent du dossier voisin etourneau-identite)
+outils/

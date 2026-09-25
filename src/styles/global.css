@@ -1,188 +1,111 @@
-/* Florian Etourneau — site. Tokens issus de la charte (tokens.css). */
+/* Florian Etourneau — site. Les tokens viennent de la charte : tokens.css, importé avant ce fichier. */
 :root {
-  --fe-bg: #FBF6EF;
-  --fe-surface: #FFFFFF;
-  --fe-surface-2: #F1ECE5;
-  --fe-border: #DFDAD3;
-  --fe-text: #1C1426;
-  --fe-text-muted: #59544F;
-  --fe-primary: #5B2A9E;
-  --fe-primary-hover: #492080;
-  --fe-on-primary: #FFFFFF;
-  --fe-primary-soft: #EFE9FE;
-  --fe-accent: #B34A0B;
-  --fe-focus: #AE92EA;
-  --fe-logo-corps: #5B2A9E;
-  --fe-logo-aile: #2A1245;
-  --fe-logo-ventre: #F7F4EF;
-  --fe-logo-bec: #1C1426;
-  --fe-pattes: #3A2F45;
-  --fe-oiseaux: #5B2A9E;
-  --fe-oiseaux-2: #2A1245;
-  --fe-font-titre: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
-  --fe-font-code: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-  --gouttiere: clamp(16px, 5vw, 120px);
-  --largeur: 1200px;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --fe-bg: #140C1E; --fe-surface: #1E1429; --fe-surface-2: #2A1E38; --fe-border: #3B2D4C;
-    --fe-text: #F3EEF8; --fe-text-muted: #B9ABC9; --fe-primary: #C8B3FA; --fe-primary-hover: #DFD3FF;
-    --fe-on-primary: #1D023D; --fe-primary-soft: #2E1D4A; --fe-accent: #DC8F6C; --fe-focus: #AE92EA;
-    --fe-logo-corps: #AE92EA; --fe-logo-aile: #5B2A9E; --fe-logo-ventre: #F7F4EF; --fe-logo-bec: #F7F4EF;
-    --fe-pattes: #B9ABC9; --fe-oiseaux: #C8B3FA; --fe-oiseaux-2: #8E6CC4;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --fe-bg: #140C1E; --fe-surface: #1E1429; --fe-surface-2: #2A1E38; --fe-border: #3B2D4C;
-  --fe-text: #F3EEF8; --fe-text-muted: #B9ABC9; --fe-primary: #C8B3FA; --fe-primary-hover: #DFD3FF;
-  --fe-on-primary: #1D023D; --fe-primary-soft: #2E1D4A; --fe-accent: #DC8F6C; --fe-focus: #AE92EA;
-  --fe-logo-corps: #AE92EA; --fe-logo-aile: #5B2A9E; --fe-logo-ventre: #F7F4EF; --fe-logo-bec: #F7F4EF;
-  --fe-pattes: #B9ABC9; --fe-oiseaux: #C8B3FA; --fe-oiseaux-2: #8E6CC4;
-  color-scheme: dark;
+  /* alias du site */
+  --gouttiere: var(--fe-page-gouttiere);
+  --largeur: var(--fe-page-largeur);
 }
 
+/* ——— Base ——— */
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; overflow-x: clip; }
 body {
   margin: 0; background: var(--fe-bg); color: var(--fe-text);
-  font-family: var(--fe-font-titre); font-size: 17px; line-height: 1.55;
+  font-family: var(--fe-font-titre); font-size: var(--fe-size-body); line-height: var(--fe-leading-body);
   -webkit-font-smoothing: antialiased; overflow-x: clip;
 }
 a { color: var(--fe-primary); text-underline-offset: 3px; }
 a:hover { color: var(--fe-primary-hover); }
 :focus-visible { outline: 3px solid var(--fe-focus); outline-offset: 3px; border-radius: 6px; }
+[hidden] { display: none !important; }
 .enveloppe { width: min(100%, var(--largeur)); margin-inline: auto; padding-inline: var(--gouttiere); }
-.lien-evitement { position: absolute; left: -999px; top: 8px; background: var(--fe-surface); padding: 10px 14px; border-radius: 8px; z-index: 10; }
+.lien-evitement { position: absolute; left: -999px; top: 8px; background: var(--fe-surface); padding: 12px 16px; border-radius: 10px; z-index: 10; }
 .lien-evitement:focus { left: 16px; }
+/* La nuée vole derrière le contenu, sur toute la page */
+.nuee-page { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+main, .pied { position: relative; z-index: 1; }
 
-/* SVG : oiseau et décor pilotés par les tokens */
+/* ——— SVG : oiseau et décor pilotés par les tokens ——— */
 .fe-corps { fill: var(--fe-logo-corps); }
 .fe-aile { fill: var(--fe-logo-aile); }
+/* l’aile lointaine de l’oiseau en vol : un ton entre l’aile et le dos */
+.fe-aile-loin { fill: var(--fe-logo-aile-loin); }
 .fe-ventre, .fe-reflet { fill: var(--fe-logo-ventre); }
 .fe-bec { fill: var(--fe-logo-bec); }
-.fe-oeil { fill: #1C1426; }
+.fe-oeil { fill: var(--fe-encre); }
+/* la famille : palette plumage de la charte, identique en clair et en sombre */
+.fe-bec-fixe { fill: var(--fe-encre); }
+.fe-femelle { fill: var(--fe-plumage-femelle); }
+.fe-femelle-aile { fill: var(--fe-plumage-femelle-aile); }
+.fe-aine { fill: var(--fe-plumage-aine); }
+.fe-cadet { fill: var(--fe-plumage-cadet); }
+.fe-aile-jeune { fill: var(--fe-nuit); }
+.fe-creme { fill: var(--fe-plumage-creme); }
+.fe-mouch, .fe-mouch-femelle { fill: none; stroke: var(--fe-plumage-moucheture); stroke-width: 2.2; stroke-linecap: round; }
+.fe-mouch-femelle { stroke: var(--fe-plumage-femelle); }
+/* le ballon : seul aplat terre cuite de l’identité */
+.fe-ballon { fill: var(--fe-terre-500); }
+.fe-couture { fill: none; stroke: var(--fe-nuit); }
 .fe-pattes, .fe-pattes-l { fill: none; stroke: var(--fe-pattes); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .fe-fil { fill: none; stroke: var(--fe-text); stroke-width: 2; vector-effect: non-scaling-stroke; }
-.fe-trajectoire { fill: none; stroke: var(--fe-text-muted); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 0.1 11; }
+.fe-trajectoire { fill: none; stroke: var(--fe-text-muted); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 0.1 11; transition: opacity .25s; }
+.fe-visee { fill: none; stroke: var(--fe-text-muted); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 0.1 7; }
+.fe-force { fill: none; stroke: var(--fe-primary); stroke-width: 6; stroke-linecap: round; }
 .fe-filet { stroke: var(--fe-text-muted); }
 .fe-encre-f { fill: var(--fe-text); }
 .fe-encre-s { stroke: var(--fe-text); }
 .fe-cercle { stroke: var(--fe-primary); }
-.fe-place { stroke: var(--fe-focus); stroke-width: 2; stroke-dasharray: 3 4; }
-.picto { width: 22px; height: 22px; flex-shrink: 0; color: var(--fe-text); }
+.fe-place { stroke: var(--fe-focus); stroke-width: 2; stroke-dasharray: 3 4; opacity: 0; transition: opacity .4s; }
+.picto { width: 20px; height: 20px; flex-shrink: 0; color: var(--fe-text); }
 
-/* En-tête */
+/* ——— En-tête ——— */
 .entete { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--fe-bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid transparent; transition: border-color .2s; }
 .entete.defile { border-bottom-color: var(--fe-border); }
 .entete .enveloppe { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 68px; }
-.marque { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; color: var(--fe-text); text-decoration: none; }
+.marque { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px; letter-spacing: -0.02em; color: var(--fe-text); text-decoration: none; }
 .marque .logo { width: 22px; height: 28px; }
 .nav { display: flex; align-items: center; gap: 6px; }
-.nav a { font-family: var(--fe-font-code); font-size: 14px; color: var(--fe-text-muted); text-decoration: none; padding: 12px 10px; }
+.nav a { font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-text-muted); text-decoration: none; padding: 12px 10px; }
 .nav a:hover { color: var(--fe-text); }
+.nav .ic-lien { display: inline-flex; align-items: center; gap: 6px; }
+.nav .ic-lien .picto { width: 16px; height: 16px; color: currentColor; }
+/* GitHub et LinkedIn : logos officiels (public/icons), teintés par masque à la couleur du lien —
+   une seule couleur, taille des pictos, aucun effet. Texte seul sur grand écran, logo seul sur mobile. */
+.nav .ic-marque { display: block; flex-shrink: 0; width: 18px; height: 18px; background-color: currentColor; -webkit-mask: var(--ic) center / contain no-repeat; mask: var(--ic) center / contain no-repeat; }
+.ic-github { --ic: url('/icons/github.svg'); }
+.ic-linkedin { --ic: url('/icons/linkedin.png'); }
 .theme { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: transparent; color: var(--fe-text); cursor: pointer; margin-left: 6px; }
 .theme .picto { color: currentColor; }
 .theme .lune { display: none; }
 :root[data-theme="dark"] .theme .soleil { display: none; }
 :root[data-theme="dark"] .theme .lune { display: block; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .theme .soleil { display: none; } :root:not([data-theme="light"]) .theme .lune { display: block; } }
-
-/* Accueil */
-.accueil { padding-block: clamp(40px, 8vw, 96px) 0; }
-.surtitre { font-family: var(--fe-font-code); font-size: 15px; color: var(--fe-accent); margin: 0 0 22px; }
-h1 { margin: 0; font-size: clamp(42px, 7.4vw, 92px); font-weight: 800; letter-spacing: -0.045em; line-height: 0.98; text-wrap: balance; max-width: 13ch; }
-h1 .deux { color: var(--fe-primary); display: block; }
-.intro { margin: 28px 0 0; max-width: 58ch; font-size: clamp(18px, 1.6vw, 21px); color: var(--fe-text-muted); }
-.scene-accueil { overflow-x: clip; margin-top: clamp(8px, 3vw, 24px); }
-.scene { display: block; width: 100%; height: auto; overflow: visible; }
-.scene .ballon { transition: opacity .4s; }
-
-/* Sections */
-.section { padding-block: clamp(64px, 9vw, 112px) 0; }
-.section-grille { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 40px; }
-.repere-section { font-family: var(--fe-font-code); font-size: 14px; color: var(--fe-accent); padding-top: 6px; }
-.repere-section h2 { font: inherit; margin: 0; }
-@media (max-width: 860px) { .section-grille { grid-template-columns: 1fr; gap: 20px; } }
-
-/* Maintenant */
-.etiquettes { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
-.etiquettes li { display: inline-flex; align-items: center; height: 28px; padding: 0 16px 0 10px; background: var(--fe-primary-soft); color: var(--fe-primary); font-size: 13px; font-weight: 700; clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%); border-radius: 4px 0 0 4px; }
-
-/* Projets */
-
-/* Parcours */
-.parcours { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--fe-border); }
-.parcours li { display: grid; grid-template-columns: 150px minmax(0, 1fr) 70px; gap: 20px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--fe-border); }
-.annees { font-family: var(--fe-font-code); font-size: 14px; color: var(--fe-text-muted); font-variant-numeric: tabular-nums; }
-.poste { font-size: 18px; }
-.boite { font-weight: 800; font-size: 18px; }
-@media (max-width: 640px) { .parcours li { grid-template-columns: 1fr auto; row-gap: 2px; } .parcours .annees { grid-column: 1 / -1; order: -1; } }
-
-/* Contact */
-.copier { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: var(--fe-surface); color: var(--fe-text); font: 700 15px var(--fe-font-titre); cursor: pointer; }
-.copier .picto { color: currentColor; width: 18px; height: 18px; }
-
-/* Pied de page */
-.pied { margin-top: clamp(56px, 9vw, 120px); overflow-x: clip; }
-.famille { display: block; width: 100%; height: auto; overflow: visible; }
-#nid { transition: transform 1.3s cubic-bezier(.2,.7,.2,1), opacity .5s; transform-box: view-box; }
-#nid.attend { transform: translate(-360px, -220px) rotate(-14deg); opacity: 0; }
-.fe-place { opacity: 0; transition: opacity .4s; }
-.bas { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding-block: 20px 36px; font-family: var(--fe-font-code); font-size: 13px; color: var(--fe-text-muted); }
-.bas span { display: inline-flex; align-items: center; gap: 6px; }
-
-@media (prefers-reduced-motion: reduce) {
-  #nid, #nid.attend { transition: none; transform: none; opacity: 1; }
-  }
-
-/* ——— Version « nuée » ——— */
-.nuee-page { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-.entete { z-index: 5; }
-main, .pied { position: relative; z-index: 1; }
-.nav .ic-lien { display: inline-flex; align-items: center; gap: 6px; }
-.nav .ic-lien .picto { width: 16px; height: 16px; color: currentColor; }
-@media (max-width: 720px) { .nav .ic-lien span:not(.ic-marque) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .nav a { padding: 12px 8px; } }
-.accueil h1 { max-width: 14ch; }
-.parcours li { padding-block: 14px 22px; }
-.legende { margin: 14px 0 0; font-family: var(--fe-font-code); font-size: 12px; color: var(--fe-text-muted); }
-.contact-pied { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
-.contact-pied strong { font-size: clamp(28px, 5vw, 56px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; overflow-wrap: anywhere; user-select: all; }
-.pied .enveloppe.haut { padding-block: clamp(72px, 10vw, 120px) 0; }
-.pied .repere-section { margin-bottom: 12px; padding: 0; }
-
-[hidden] { display: none !important; }
-html { overflow-x: clip; }
-@media (max-width: 520px) { .entete .enveloppe { gap: 8px; } .nav .contact-lien { display: none; } .marque { font-size: 16px; } .nav { gap: 0; } }
-
-.accueil { padding-block: clamp(28px, 5vw, 64px) 0; }
-
-@media (min-width: 1000px) { .scene-accueil { margin-top: clamp(-220px, -14vw, -140px); pointer-events: none; } }
-
-/* Maintenant : liste + perchoir de la nuée */
-.perchoir { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); width: 100%; aspect-ratio: 9 / 8; border-radius: 20px; border: 1.5px dashed var(--fe-border); display: grid; place-items: end center; padding: 18px; }
-@media (max-width: 960px) { .perchoir { display: none; } }
-
-/* ——— v4 : tir au panier, « maintenant » allégé, atterrissage ——— */
-.scene .ballon { transition: opacity .25s; }
-.grille-large { grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); }
-.repere-section .legende { margin: 14px 0 0; max-width: 22ch; }
-.perchoir { position: static; flex: 1; min-height: 260px; aspect-ratio: auto; }
-@media (max-width: 860px) {
-  .grille-large { grid-template-columns: 1fr; gap: 20px; }
-  .repere-section .legende { max-width: none; }
+@media (min-width: 721px) { .nav .ic-marque { display: none; } }
+@media (max-width: 720px) {
+  .nav .ic-lien span:not(.ic-marque) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .nav a { padding: 12px 8px; }
 }
-@media (max-width: 960px) { .perchoir { display: none; } }
-#nid { transition: none; }
-#nid.attend { transform: none; opacity: 0; }
-#nid.pose { animation: se-poser .45s cubic-bezier(.3,.6,.3,1); transform-box: fill-box; transform-origin: 50% 100%; }
-@keyframes se-poser { 0% { transform: translateY(-4px) scaleY(1.02); } 45% { transform: translateY(1px) scaleY(.94); } 100% { transform: none; } }
-@media (prefers-reduced-motion: reduce) { #nid.pose { animation: none; } }
+@media (max-width: 520px) {
+  .entete .enveloppe { gap: 8px; }
+  .nav { gap: 0; }
+  .nav .contact-lien { display: none; }
+}
 
-/* ——— v5 : le mini-jeu du tir, maintenant en rotation ——— */
+/* ——— Accueil ———
+   Le haut de page tient dans l’écran : tailles liées à la hauteur visible (échelle de la charte : 72 / 20 max). */
+.accueil { padding-block: clamp(16px, 5svh, 56px) 0; }
+.surtitre { font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-accent); margin: 0 0 clamp(12px, 2.4svh, 20px); }
+/* l’accroche sur deux lignes, une phrase par ligne */
+h1 { margin: 0; font-size: clamp(38px, min(7.4vw, 9.2svh), 72px); font-weight: 800; letter-spacing: var(--fe-tracking-display); line-height: var(--fe-leading-display); text-wrap: balance; }
+h1 .deux { color: var(--fe-primary); display: block; }
+/* l’intro reste à 44ch : plus large, ses lignes croisent l’oiseau et repoussent la scène sous le texte */
+.intro { margin: clamp(12px, 2.6svh, 24px) 0 0; max-width: 44ch; font-size: clamp(16px, 2.7svh, 20px); line-height: 1.5; color: var(--fe-text-muted); text-wrap: pretty; }
+/* Sur grand écran, site.js remonte la scène sous le texte (margin-top en ligne) */
+.scene-accueil { position: relative; overflow-x: clip; margin-top: 48px; }
+@media (min-width: 1000px) { .scene-accueil { margin-top: clamp(-220px, -14vw, -140px); pointer-events: none; } }
+.scene { display: block; width: 100%; height: auto; overflow: visible; }
+.scene .ballon { transition: opacity .25s; }
+
+/* Le tir : l’aile lève le ballon, on vise, on lâche */
 #oiseau-pose { overflow: visible; }
 #oiseau-pose.arme #aile-pliee { display: none; }
 #oiseau-pose:not(.arme) #aile-levee { display: none; }
@@ -190,155 +113,160 @@ html { overflow-x: clip; }
 #ballon:active, .scene.vise #ballon { cursor: grabbing; }
 #ballon:focus { outline: none; }
 #ballon:focus-visible .peau-ballon { stroke: var(--fe-focus); stroke-width: 4; }
-.fe-trajectoire { stroke: var(--fe-primary); stroke-width: 3; }
-@keyframes invite { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
-@keyframes minuteur { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-/* ——— v6 : tableau d’affichage, visée direction + puissance ——— */
-.tableau-marque { font-family: var(--fe-font-titre); font-weight: 800; font-size: 11px; letter-spacing: .32em; fill: #F7F4EF; }
-.tableau.marque #t-paniers { animation: clignote .3s steps(2) 3; }
-@keyframes clignote { 50% { opacity: .15; } }
-.fe-trajectoire { stroke: var(--fe-text-muted); stroke-width: 2.4; transition: opacity .25s; }
-.fe-visee { fill: none; stroke: var(--fe-text-muted); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 0.1 7; }
-.fe-force { fill: none; stroke: var(--fe-primary); stroke-width: 6; stroke-linecap: round; }
-@media (prefers-reduced-motion: reduce) { .tableau.buzz .tableau-24, .tableau.marque #t-paniers { animation: none; } }
-
-/* ——— v8 : tableau Bodet accroché au panneau, proportions de la charte ———
-   Le tableau et l’indice sont en HTML : leur taille suit l’échelle typographique (×1,25, base 16)
-   et la grille de 4, quelle que soit la largeur de la scène. Seule leur position suit l’illustration. */
-.scene-accueil { position: relative; }
+/* Le tableau Bodet, accroché au panneau. Exception de la charte : il garde ses couleurs d’afficheur (--fe-afficheur-*).
+   Il est en HTML : sa taille suit l’échelle typographique
+   et la grille de 4 quelle que soit la largeur de la scène ; seule sa position suit l’illustration.
+   Il n’apparaît qu’à la première prise de ballon (.range). */
 .tableau {
   --w: 152px;
   position: absolute; width: var(--w);
   left: min(var(--poteau-x, 90.78%), calc(100% - 16px - var(--w) / 2));
   bottom: calc(var(--panneau-bas, 88.55%) + 8px); transform: translateX(-50%);
   display: grid; gap: 4px; padding: 8px 12px 8px;
-  background: #1C1426; border: 1px solid var(--fe-border); border-radius: 6px;
-  color: #F7F4EF; text-align: center; transition: border-color .2s, box-shadow .2s;
+  background: var(--fe-afficheur-fond); border: 1px solid var(--fe-border); border-radius: 6px;
+  color: var(--fe-afficheur-texte); text-align: center;
+  transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1.15), border-color .2s, box-shadow .2s;
 }
-.tableau-potence { position: absolute; left: var(--poteau-x, 90.78%); bottom: var(--panneau-bas, 88.55%); width: 3px; height: 8px; transform: translateX(-50%); background: var(--fe-text); }
+.tableau.range { opacity: 0; transform: translate(-50%, -24px); pointer-events: none; }
+.tableau-potence { position: absolute; left: var(--poteau-x, 90.78%); bottom: var(--panneau-bas, 88.55%); width: 3px; height: 8px; transform: translateX(-50%); background: var(--fe-text); transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1.15); }
+.tableau-potence.range { opacity: 0; transform: translate(-50%, -8px) scaleY(0); }
 .tableau-marque { font: 800 12px/1 var(--fe-font-titre); letter-spacing: .24em; padding-left: .24em; }
 .tableau-cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 .tableau-case { display: grid; gap: 4px; }
-.tableau-case b { display: block; padding: 4px 0; border-radius: 4px; background: #0C0712; font: 500 24px/1 var(--fe-font-code); color: #FF8A3D; font-variant-numeric: tabular-nums; }
-.tableau-case-24 b { color: #FF4B3A; }
+.tableau-case b { display: block; padding: 4px 0; border-radius: 4px; background: var(--fe-afficheur-case); font: 500 24px/1 var(--fe-font-code); color: var(--fe-afficheur-led); font-variant-numeric: tabular-nums; }
+.tableau-case-24 b { color: var(--fe-afficheur-led-alerte); }
 .tableau-case b.urgent { font-size: 20px; line-height: 1.2; }
-.tableau-case i { font: 400 10px/1 var(--fe-font-code); font-style: normal; color: #B9ABC9; letter-spacing: .04em; }
-.tableau.buzz { border-color: #FF4B3A; box-shadow: 0 0 0 2px #FF4B3A; }
+.tableau-case i { font: 400 10px/1 var(--fe-font-code); font-style: normal; color: var(--fe-afficheur-libelle); letter-spacing: .04em; }
+.tableau.buzz { border-color: var(--fe-afficheur-led-alerte); box-shadow: 0 0 0 2px var(--fe-afficheur-led-alerte); }
 .tableau.buzz #t-24 { animation: clignote .5s steps(2) 4; }
-.tableau.marque #t-paniers { animation: clignote .3s steps(2) 3; }
-.indice-tir { position: absolute; margin: 0; display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1.2 var(--fe-font-code); color: var(--fe-accent); white-space: nowrap; pointer-events: none; transition: opacity .4s; animation: invite 2.4s ease-in-out infinite; }
+.tableau.point #t-paniers { animation: clignote .3s steps(2) 3; }
+@keyframes clignote { 50% { opacity: .15; } }
+/* « à toi de tirer » : clignote trois fois, puis s’efface au premier tir */
+.indice-tir { position: absolute; margin: 0; display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1.2 var(--fe-font-code); color: var(--fe-accent); white-space: nowrap; pointer-events: none; transition: opacity .4s; animation: invite 2.4s ease-in-out 3; }
 .indice-tir svg { width: 8px; height: 10px; fill: currentColor; flex-shrink: 0; }
 .indice-tir.a-gauche { flex-direction: row-reverse; }
 .indice-tir.a-gauche svg { transform: scaleX(-1); }
 .indice-tir.parti { opacity: 0; animation: none; }
-@media (max-width: 999px) { .scene-accueil { margin-top: 64px; } }
+@keyframes invite { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
 @media (max-width: 600px) {
   .tableau { --w: 112px; padding: 4px 8px 8px; }
   .tableau-marque { font-size: 10px; }
   .tableau-case b { font-size: 16px; }
   .tableau-case b.urgent { font-size: 14px; line-height: 16px; }
   .tableau-case i { display: none; }
-  .indice-tir { font-size: 12px; }
 }
-@media (prefers-reduced-motion: reduce) { .indice-tir { animation: none; } }
 
-/* ——— v9 : « maintenant » en récit — la murmuration au centre ———
-   La scène reste collée pendant qu’on fait défiler les étapes ; la nuée dessine le picto de l’étape en cours. */
-.maintenant .repere-section { margin-bottom: 24px; }
-.recit { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
-.scene-nuee { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 96px); height: min(560px, calc(100vh - 160px)); display: grid; grid-template-rows: 1fr auto; gap: 16px; }
-.scene-nuee .perchoir { position: relative; display: block; border: 0; border-radius: 0; padding: 0; min-height: 0; aspect-ratio: auto; height: 100%; }
-.etapes { list-style: none; margin: 0; padding: 0; counter-reset: etape; }
-.etape { min-height: min(560px, calc(100vh - 160px)); display: flex; flex-direction: column; justify-content: center; gap: 8px; opacity: .32; transition: opacity .35s; }
+/* ——— Sections ——— */
+.section { padding-block: clamp(64px, 9vw, 112px) 0; }
+.repere-section { font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-accent); }
+.repere-section h2 { font: inherit; margin: 0; }
+.legende { margin: 8px 0 0; font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-text-muted); }
+/* Le repère se place au-dessus du contenu, dans toutes les sections */
+.section .repere-section { margin-bottom: 24px; }
+.etiquettes { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.etiquettes li { display: inline-flex; align-items: center; height: 28px; padding: 0 16px 0 10px; background: var(--fe-primary-soft); color: var(--fe-primary); font-family: var(--fe-font-titre); font-size: 14px; font-weight: 700; clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%); border-radius: 4px 0 0 4px; }
+
+/* ——— Maintenant : un récit ———
+   La scène reste collée pendant qu’on fait défiler les étapes ; la nuée y dessine la forme de l’étape en cours.
+   Sur mobile, chaque étape a sa propre scène. */
+.recit { --h-scene: min(440px, calc(100vh - 200px)); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+.scene-nuee { position: sticky; top: calc((100vh - var(--h-scene)) / 2 + 34px); height: var(--h-scene); display: grid; grid-template-rows: 1fr; gap: 16px; }
+.perchoir { position: relative; top: 0; display: block; width: 100%; height: 100%; }
+.etapes { list-style: none; margin: 0; padding: 0; }
+.etape { min-height: var(--h-scene); display: flex; flex-direction: column; justify-content: center; padding-block: 24px; opacity: .32; transition: opacity .35s; }
 .etape.actif { opacity: 1; }
-.etape + .etape { margin-top: -96px; }
-.etape:last-child { margin-bottom: 0; }
-.etape-type { margin: 0; display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1 var(--fe-font-code); color: var(--fe-accent); }
+.etape-scene { display: none; }
+.etape-type { display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1 var(--fe-font-code); color: var(--fe-accent); }
 .etape-type .picto { width: 20px; height: 20px; color: currentColor; }
-.etape h3 { margin: 0; font-size: 32px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
+.etape h3 { font-size: 32px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
 .etape h3 a { color: var(--fe-text); text-decoration: none; display: inline-flex; align-items: center; gap: 12px; }
 .etape h3 a:hover { color: var(--fe-primary); }
 .etape h3 .pointe { width: 12px; height: 16px; fill: var(--fe-primary); flex-shrink: 0; }
-.etape-desc { margin: 0; font-size: 20px; line-height: 1.5; color: var(--fe-text-muted); max-width: 32ch; }
-@media (max-width: 860px) {
-  .recit { grid-template-columns: 1fr; gap: 0; }
-  .scene-nuee { top: calc(env(safe-area-inset-top, 0px) + 68px); height: 40vh; z-index: 2; background: var(--fe-bg); padding-block: 16px 8px; }
-  .etape { min-height: 48vh; }
-  .etape + .etape { margin-top: 0; }
-  .etape h3 { font-size: 24px; }
-  .etape-desc { font-size: 16px; }
-}
-@media (prefers-reduced-motion: reduce) { .etape { transition: none; } }
-/* v9b : scène centrée verticalement ; sur mobile, chaque étape a sa propre scène */
-.recit { --h-scene: min(520px, calc(100vh - 176px)); }
-.scene-nuee { height: var(--h-scene); top: calc((100vh - var(--h-scene)) / 2 + 34px); }
-.etape { min-height: var(--h-scene); }
-.etape-scene { display: none; }
-@media (max-width: 860px) {
-  .scene-nuee { display: none; }
-  .etape { min-height: 0; padding-block: 24px 48px; justify-content: flex-start; }
-  .etape-scene { display: block; height: min(300px, 36vh); margin-bottom: 16px; }
-}
-/* v10 : scène à la hauteur du texte, sans compteur ; points concrets en puces « pointe » */
-.scene-nuee { grid-template-rows: 1fr; }
-.etape-points { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; font-size: 16px; color: var(--fe-text); max-width: 40ch; }
+.etape-desc { font-size: 20px; line-height: 1.5; color: var(--fe-text-muted); max-width: 40ch; }
+/* puces « pointe » */
+.etape-points { list-style: none; padding: 0; display: grid; gap: 12px; font-size: 16px; color: var(--fe-text); max-width: 52ch; }
 .etape-points li { display: flex; gap: 12px; align-items: baseline; }
 .etape-points li::before { content: ''; flex-shrink: 0; width: 7px; height: 9px; background: var(--fe-primary); clip-path: polygon(0 0, 100% 50%, 0 100%); transform: translateY(-1px); }
-.scene-nuee .perchoir { top: 0; }
-.etape-lien { margin: 0; font-size: 16px; color: var(--fe-text-muted); }
-.etape-lien a { font-weight: 700; }
-.etape-lien code { font-family: var(--fe-font-code); font-size: 14px; }
-/* v14 : le tableau descend à la première prise de ballon */
-.tableau, .tableau-potence { transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1.15), border-color .2s, box-shadow .2s; }
-.tableau.range { opacity: 0; transform: translate(-50%, -24px); pointer-events: none; }
-.tableau-potence.range { opacity: 0; transform: translate(-50%, -8px) scaleY(0); }
-@media (prefers-reduced-motion: reduce) { .tableau, .tableau-potence { transition: none; } }
-/* v15 : intro du haut de page (lead 20/400) */
-.accueil .intro { margin: 24px 0 0; max-width: 44ch; font-size: 20px; line-height: 1.5; color: var(--fe-text-muted); text-wrap: pretty; }
-@media (max-width: 600px) { .accueil .intro { font-size: 16px; margin-top: 16px; } }
-/* v16 : le haut de page tient dans l’écran — tailles liées à la hauteur visible (échelle de la charte : 72 / 20 max) */
-.accueil { padding-block: clamp(16px, 5svh, 56px) 0; }
-.surtitre { margin-bottom: clamp(12px, 2.4svh, 20px); }
-.accueil h1 { font-size: clamp(38px, min(7.4vw, 9.2svh), 72px); max-width: 15ch; }
-.accueil .intro { font-size: clamp(16px, 2.7svh, 20px); margin-top: clamp(12px, 2.6svh, 24px); }
-@media (max-width: 999px) { .scene-accueil { margin-top: 48px; } }
-/* v17 : étiquettes « pointe » (charte) sous les étapes */
-.etape-tags { margin-top: 8px; }
-.etiquettes li { font-family: var(--fe-font-titre); font-size: 14px; }
-@media (max-width: 860px) { .etape-tags { margin-top: 4px; } }
-/* v18 : une ligne d’impact par poste */
-.parcours li { row-gap: 4px; }
-.etape + .etape { margin-top: 0; } .etape { padding-block: 24px; }
-/* v20 : MaxDS, puis ses missions en retrait — la hiérarchie se lit d’un coup d’œil */
-/* v21 : copie de l’adresse — le ballon rebondit et sa trace forme la coche */
-.copier { position: relative; transition: background .25s, border-color .25s, color .25s; }
-.copier .coche { display: none; width: 20px; height: 20px; overflow: visible; }
-.copier.copie { background: var(--fe-primary); border-color: var(--fe-primary); color: var(--fe-on-primary); }
+/* trois axes : Produit / DX / IA */
+.etape-axes li { display: grid; grid-template-columns: 5.2em minmax(0, 1fr); column-gap: 12px; }
+.etape-axes li::before { display: none; }
+.etape-axes .axe { font: 500 14px/1 var(--fe-font-code); color: var(--fe-accent); white-space: nowrap; }
+.etape-lien { font-size: 14px; color: var(--fe-text-muted); }
+.etape-lien a { font-weight: 700; font-size: 16px; }
+.etape-lien code { font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; }
+.aussi { font-size: 14px; color: var(--fe-text-muted); }
+.aussi a { font-weight: 700; color: var(--fe-text); text-decoration-color: var(--fe-primary); }
+.aussi a:hover { color: var(--fe-primary); }
+/* Rythme vertical, pris dans la grille de 4 : 8–12 px dans un groupe · 24 px entre les groupes · 32 px avant « aussi » */
+.etape > * { margin: 0; }
+.etape .etape-type + h3 { margin-top: 8px; }
+.etape h3 + .etape-desc { margin-top: 12px; }
+.etape .etape-points { margin-top: 24px; }
+.etape .etape-points + *, .etape .etape-desc + .etiquettes { margin-top: 24px; }
+.etape .etape-tags + .etape-lien, .etape .etape-tags + .aussi { margin-top: 8px; }
+.etape .etape-lien + .aussi { margin-top: 32px; }
+@media (max-width: 860px) {
+  .recit { grid-template-columns: 1fr; gap: 0; }
+  .scene-nuee { display: none; }
+  .etape { min-height: 0; justify-content: flex-start; }
+  .etape-scene { display: block; height: min(300px, 36vh); margin-bottom: 24px; }
+  .etape h3 { font-size: 24px; }
+  .etape-desc { font-size: 16px; }
+  .etape-desc, .etape-points { max-width: 60ch; }
+}
+@media (max-width: 520px) {
+  .etape-axes li { display: block; }
+  .etape-axes .axe { display: block; margin-bottom: 4px; }
+}
+
+/* ——— Parcours : un oiseau posé = deux mois ——— */
+.parcours { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--fe-border); }
+.parcours li { display: grid; grid-template-columns: 150px minmax(0, 1fr) 70px; gap: 4px 20px; align-items: baseline; padding-block: 14px 22px; border-top: 1px solid var(--fe-border); }
+.annees { font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-text-muted); font-variant-numeric: tabular-nums; }
+.poste { font-size: 16px; }
+.boite { font-weight: 800; font-size: 16px; }
+@media (max-width: 640px) { .parcours li { grid-template-columns: 1fr auto; } .parcours .annees { grid-column: 1 / -1; order: -1; } }
+
+/* ——— Contact ——— */
+.pied { margin-top: clamp(56px, 9vw, 120px); overflow-x: clip; }
+.pied .enveloppe.haut { padding-block: clamp(72px, 10vw, 120px) 0; }
+.pied .repere-section { margin-bottom: 8px; }
+.contact-appel { margin: 0 0 16px; font-size: 20px; line-height: var(--fe-leading-lead); color: var(--fe-text-muted); text-wrap: balance; }
+@media (max-width: 600px) { .contact-appel { font-size: 16px; } }
+.contact-pied { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.contact-pied strong { font-size: clamp(20px, 5.6vw, 48px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; overflow-wrap: normal; word-break: normal; user-select: all; }
+/* Copier l’adresse : le ballon rebondit et sa trace forme la coche */
+#adresse { background: linear-gradient(var(--fe-primary-soft), var(--fe-primary-soft)) no-repeat 0 100% / 0% 38%; transition: color .3s, background-size .5s cubic-bezier(.2,.8,.2,1); }
+.copie-ok #adresse { color: var(--fe-primary); background-size: 100% 38%; }
+.copier { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: var(--fe-surface); color: var(--fe-text); font: 700 16px var(--fe-font-titre); cursor: pointer; transition: background .25s, border-color .25s, color .25s; }
+.copier .picto { color: currentColor; width: 18px; height: 18px; }
+.copier .coche { display: none; width: 24px; height: 24px; margin: -2px 0; overflow: visible; }
+.copier.copie { background: var(--fe-primary); border-color: var(--fe-primary); color: var(--fe-on-primary); animation: rebond-bouton .5s cubic-bezier(.3,1.6,.5,1); }
 .copier.copie .enveloppe-ic { display: none; }
 .copier.copie .coche { display: block; }
 .coche-trace { stroke-dasharray: 1; stroke-dashoffset: 1; }
 .copier.copie .coche-trace { animation: coche-trace .7s cubic-bezier(.5,0,.3,1) forwards; }
 .coche-ballon { offset-path: path('M4 11 L9.5 16.5 L20 5'); offset-distance: 0%; offset-rotate: 0deg; opacity: 0; }
 .copier.copie .coche-ballon { animation: coche-ballon .7s cubic-bezier(.5,0,.3,1) forwards, coche-ballon-fin .3s .7s ease-out forwards; }
+.statut-copie { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 @keyframes coche-trace { to { stroke-dashoffset: 0; } }
 @keyframes coche-ballon { 0% { offset-distance: 0%; opacity: 1; } 100% { offset-distance: 100%; opacity: 1; } }
 @keyframes coche-ballon-fin { 0% { offset-distance: 100%; opacity: 1; transform: scale(1); } 100% { offset-distance: 100%; opacity: 0; transform: scale(1.6); } }
-.copier.copie + .statut-copie { }
-.statut-copie { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-#adresse { transition: color .3s; }
-.copie-ok #adresse { color: var(--fe-primary); }
-@media (prefers-reduced-motion: reduce) {
-  .copier.copie .coche-trace { animation: none; stroke-dashoffset: 0; }
-  .copier.copie .coche-ballon { animation: none; opacity: 0; }
-}
-.copier .coche { width: 24px; height: 24px; margin: -2px 0; }
-.copier.copie { animation: rebond-bouton .5s cubic-bezier(.3,1.6,.5,1); }
 @keyframes rebond-bouton { 0% { transform: scale(.94); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
-#adresse { background: linear-gradient(var(--fe-primary-soft), var(--fe-primary-soft)) no-repeat 0 100% / 0% 38%; transition: color .3s, background-size .5s cubic-bezier(.2,.8,.2,1); }
-.copie-ok #adresse { background-size: 100% 38%; }
-@media (prefers-reduced-motion: reduce) { .copier.copie { animation: none; } #adresse { transition: none; } }
-/* v22 : le fils du milieu dribble six fois, puis garde le ballon (clic pour relancer) */
+
+/* ——— Pied de page : chez moi, la famille sur le fil ——— */
+.chez-moi { display: flex; align-items: center; gap: 8px; margin: 48px 0 0; font-size: 16px; color: var(--fe-text-muted); }
+.chez-moi .picto { color: var(--fe-accent); width: 20px; height: 20px; }
+.chez-moi strong { font-family: var(--fe-font-code); font-weight: 500; color: var(--fe-text); font-variant-numeric: tabular-nums; }
+.scene-pied { margin-top: 24px; }
+.famille { display: block; width: 100%; height: auto; overflow: visible; }
+/* Retour au nid : Florian traverse la page et se pose à sa place */
+#nid { transform-box: view-box; }
+#nid.attend { opacity: 0; }
+#nid.pose { animation: se-poser .45s cubic-bezier(.3,.6,.3,1); transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes se-poser { 0% { transform: translateY(-4px) scaleY(1.02); } 45% { transform: translateY(1px) scaleY(.94); } 100% { transform: none; } }
+/* Le fils du milieu dribble six fois, puis garde le ballon (clic pour relancer) */
 .dribble-ballon { transform-box: fill-box; transform-origin: 50% 100%; }
 .dribbleur { cursor: pointer; }
 .dribbleur:focus-visible { outline: 2px solid var(--fe-focus); outline-offset: 4px; }
@@ -352,86 +280,27 @@ html { overflow-x: clip; }
 }
 @keyframes dribble-ecrase { 0%, 44% { transform: none; } 50% { transform: scale(1.12, .84); } 56%, 100% { transform: none; } }
 @keyframes dribble-bras { 0%, 100% { transform: translateY(0); } 20% { transform: translateY(1.2px) scaleY(.985); } }
-/* v23 : trois axes — UX/UI, DX, IA */
-.etape-axes li::before { display: none; }
-.etape-axes li { display: block; }
-.etape-axes .axe { display: inline-block; min-width: 3.4em; margin-right: 8px; font: 500 14px/1 var(--fe-font-code); color: var(--fe-accent); }
-.etape-axes li { display: grid; grid-template-columns: 3.6em minmax(0, 1fr); column-gap: 8px; align-items: baseline; }
-.etape-axes .axe { min-width: 0; margin: 0; }
-/* v24 : libellés Produit / DX / IA — colonne assez large, et empilés sur petit écran */
-.etape-axes li { grid-template-columns: 5.2em minmax(0, 1fr); column-gap: 12px; }
-.etape-axes .axe { white-space: nowrap; }
-@media (max-width: 520px) {
-  .etape-axes li { display: block; }
-  .etape-axes .axe { display: block; margin-bottom: 4px; }
+.bas { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding-block: 20px 36px; font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-text-muted); }
+.bas span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ——— 404 : air ball ——— */
+.perdu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 48px; align-items: center; min-height: calc(100svh - 68px - 80px); padding-block: 48px; }
+.perdu-lien { margin: 24px 0 0; }
+.perdu-lien a { display: inline-flex; align-items: center; gap: 12px; font-weight: 700; text-decoration: none; }
+.perdu-lien .pointe { width: 8px; height: 10px; fill: currentColor; }
+.perdu-scene { display: block; width: 100%; height: auto; }
+@media (max-width: 760px) { .perdu { grid-template-columns: 1fr; gap: 24px; min-height: 0; } .perdu-scene { max-width: 320px; } }
+
+/* ——— Moins d’animations ——— */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .indice-tir { animation: none; }
+  .tableau, .tableau-potence { transition: none; }
+  .tableau.buzz #t-24, .tableau.point #t-paniers { animation: none; }
+  .etape { transition: none; }
+  .copier.copie { animation: none; }
+  .copier.copie .coche-trace { animation: none; stroke-dashoffset: 0; }
+  .copier.copie .coche-ballon { animation: none; opacity: 0; }
+  #adresse { transition: none; }
+  #nid.pose { animation: none; }
 }
-/* v25 : responsive — textes qui respirent, email qui tient, largeurs de lecture */
-.etape-desc { max-width: 40ch; }
-.etape-points { max-width: 52ch; }
-@media (max-width: 860px) { .etape-desc, .etape-points { max-width: 60ch; } }
-@media (max-width: 520px) { .etape-points { gap: 12px; } }
-.contact-pied strong { font-size: clamp(20px, 5.6vw, 56px); overflow-wrap: normal; word-break: normal; }
-/* v26 : pour le plaisir — projets perso, en bas de page */
-
-/* ——— v27 : allègement — échelle typographique de la charte (14 / 16 / 20 / 24 / 32 / 48 / 72) ——— */
-body { font-size: 16px; }
-.surtitre, .bas, .legende, .repere-section .legende, .parcours .annees, .etiquettes li, .plaisir-liste .etiquettes li { font-size: 14px; }
-.poste, .boite { font-size: 16px; }
-.copier { font-size: 16px; }
-.contact-pied strong { font-size: clamp(20px, 5.6vw, 48px); }
-@media (max-width: 600px) { .indice-tir { font-size: 14px; } }
-.marque { font-size: 16px; }
-/* récit plus court */
-.recit { --h-scene: min(440px, calc(100vh - 200px)); }
-/* l’intro reste à 44ch (v16) : plus large, ses lignes croisent l’oiseau et repoussent la scène sous le texte */
-/* l’indice ne clignote que trois fois */
-.indice-tir { animation-iteration-count: 3; }
-/* chez moi, juste au-dessus de la famille */
-.chez-moi { display: flex; align-items: center; gap: 8px; margin: 40px 0 0; font-size: 16px; color: var(--fe-text-muted); }
-.chez-moi .picto { color: var(--fe-accent); width: 20px; height: 20px; }
-.chez-moi strong { font-family: var(--fe-font-code); font-weight: 500; color: var(--fe-text); font-variant-numeric: tabular-nums; }
-/* v28 : projets pour le plaisir, rattachés à l’open source */
-.aussi { margin: 4px 0 0; font-size: 14px; color: var(--fe-text-muted); }
-.aussi a { font-weight: 700; color: var(--fe-text); text-decoration-color: var(--fe-primary); }
-.aussi a:hover { color: var(--fe-primary); }
-
-/* ——— v29 : rythme vertical — trois niveaux pris dans la grille de 4 de la charte ———
-   8–12 px dans un groupe · 24 px entre les groupes · 64–96 px entre les sections */
-.etape { gap: 0; }
-.etape > * { margin: 0; }
-.etape .etape-type + h3 { margin-top: 8px; }
-.etape h3 + .etape-desc { margin-top: 12px; }
-.etape .etape-points { margin-top: 24px; gap: 12px; }
-.etape .etape-points + *, .etape .etape-desc + .etiquettes { margin-top: 24px; }
-.etape .etape-tags + .etape-lien, .etape .etape-lien + .aussi, .etape .etape-tags + .aussi { margin-top: 8px; }
-.etape-lien { font-size: 14px; color: var(--fe-text-muted); }
-.etape-lien a { font-weight: 400; }
-.etape-lien code { font-size: 14px; }
-@media (max-width: 860px) { .etape-scene { margin-bottom: 24px; } }
-/* bas de page */
-.pied .repere-section { margin-bottom: 8px; }
-.chez-moi { margin-top: 48px; }
-.scene-pied { margin-top: 24px; }
-.etape .etape-points + .etape-lien { margin-top: 24px; }
-/* « aussi » : son propre groupe, bien détaché */
-.etape .etape-lien + .aussi { margin-top: 32px; }
-
-.etape-lien a { font-weight: 700; font-size: 16px; }
-
-/* ——— v30 : alignement sur la charte ———
-   les puces restent en body (16) sur mobile ; tout le mono passe en 14/500 */
-.nav a, .surtitre, .repere-section, .annees, .bas, .legende, .etape-lien code { font-weight: 500; }
-
-/* v31 : GitHub et LinkedIn avec leur logo officiel (fichiers de marque dans public/icons),
-   teintés par masque à la couleur du lien — une seule couleur, taille des pictos, aucun effet */
-.nav .ic-marque { display: block; flex-shrink: 0; width: 18px; height: 18px; background-color: currentColor; -webkit-mask: var(--ic) center / contain no-repeat; mask: var(--ic) center / contain no-repeat; }
-.ic-github { --ic: url('/icons/github.svg'); }
-.ic-linkedin { --ic: url('/icons/linkedin.png'); }
-
-/* v32 : l’accroche sur deux lignes, une phrase par ligne, comme la maquette de la charte */
-.accueil h1 { max-width: none; }
-
-/* v33 : l’oiseau en vol suit les tokens du logo (clair comme sombre) ; l’aile lointaine est un ton entre l’aile et le dos */
-.fe-aile-loin { fill: color-mix(in srgb, var(--fe-logo-aile) 60%, var(--fe-logo-corps)); }
-/* menu : texte seul sur grand écran, logos seuls sur mobile (où les noms ne tiennent pas) */
-@media (min-width: 721px) { .nav .ic-marque { display: none; } }
