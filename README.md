@@ -2,7 +2,8 @@
 
 Site personnel de Florian Etourneau : une page, une nuée d’étourneaux, un panier de basket.
 Construit avec [Astro](https://astro.build), sans framework côté client. Page statique, sauf
-le formulaire de contact : une fonction Vercel qui envoie le message par [Resend](https://resend.com).
+le formulaire de contact : une [action Astro](https://docs.astro.build/en/guides/actions/) (fonction Vercel)
+qui vérifie le visiteur avec [ALTCHA](https://altcha.org) (preuve de travail, sans service tiers) et envoie le message par [Resend](https://resend.com).
 
 ## Démarrer
 
@@ -13,13 +14,14 @@ npm run build     # génère dist/
 npm run preview   # sert dist/ en local
 ```
 
-Pour tester l’envoi du formulaire en local, créer un fichier `.env` (hors git) :
+Pour tester l’envoi du formulaire en local, créer un fichier `.env` (hors git, voir `.env.example`) :
 
 ```sh
 RESEND_API_KEY=re_…
 ```
 
-Sans clé, le formulaire répond que l’envoi n’est pas configuré et renvoie vers l’adresse email.
+Avec cette clé, l’envoi est réel. Sans clé, le formulaire répond que l’envoi n’est pas configuré.
+En local, ALTCHA fonctionne avec une clé de développement : rien à configurer.
 
 Node 22.12 ou plus récent.
 
@@ -49,7 +51,7 @@ src/
     global.css             styles du site, uniquement à partir des tokens
   pages/index.astro        assemble la page
   pages/404.astro          « Air ball » : la page introuvable
-  pages/api/contact.ts     envoi du formulaire par Resend (seule route serveur)
+  actions/index.ts         actions `defi` et `contact` : défi ALTCHA, validation, envoi par Resend (seul code serveur)
 outils/copier-tokens.mjs   (local, hors git) recopie tokens.css depuis ../etourneau-identite
 ```
 
@@ -62,8 +64,10 @@ côté charte, lancer `node outils/copier-tokens.mjs` (outil local, hors git : i
 
 ## Déploiement
 
-Vercel, avec l’adaptateur `@astrojs/vercel`. Variable d’environnement à déclarer :
-`RESEND_API_KEY`. Le domaine `florian-etourneau.dev` doit être vérifié dans Resend
+Vercel, avec l’adaptateur `@astrojs/vercel`. Variables d’environnement à déclarer :
+`RESEND_API_KEY`, et pour l’anti-robot `ALTCHA_HMAC_KEY` (une chaîne aléatoire qu’on génère soi-même,
+par exemple `node -e "console.log(crypto.randomBytes(32).toString('hex'))"`). Sans elle, le formulaire marche
+quand même, protégé par le pot de miel seul. Le domaine `florian-etourneau.dev` doit être vérifié dans Resend
 (l’expéditeur est `contact@florian-etourneau.dev`) : chaque push sur `main` part en production,
 chaque branche a sa preview. Domaine : `florian-etourneau.dev`.
 

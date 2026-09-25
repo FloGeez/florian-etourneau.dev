@@ -12,6 +12,9 @@ export default defineConfig({
     schema: {
       // Clé API Resend, à déclarer dans Vercel (Settings → Environment Variables) et dans .env en local.
       RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Anti-robot du formulaire (ALTCHA) : une clé secrète qu’on invente, pour signer les défis.
+      // Facultative : sans elle, la vérification est ignorée en production ; en local, une clé de développement sert.
+      ALTCHA_HMAC_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
 });
