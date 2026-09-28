@@ -237,8 +237,12 @@ h1 .deux { color: var(--fe-primary); display: block; }
 /* Copier l’adresse : le ballon rebondit et sa trace forme la coche */
 #adresse { background: linear-gradient(var(--fe-primary-soft), var(--fe-primary-soft)) no-repeat 0 100% / 0% 38%; transition: color .3s, background-size .5s cubic-bezier(.2,.8,.2,1); }
 .copie-ok #adresse { color: var(--fe-primary); background-size: 100% 38%; }
-.copier { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: var(--fe-surface); color: var(--fe-text); font: 700 16px var(--fe-font-titre); cursor: pointer; transition: background .25s, border-color .25s, color .25s; }
+.copier { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: var(--fe-surface); color: var(--fe-text); font: 700 16px var(--fe-font-titre); cursor: pointer; transition: background .25s, border-color .25s, color .25s, transform var(--fe-duration-courte) var(--fe-ease-depassement); }
 .copier .picto { color: currentColor; width: 18px; height: 18px; }
+/* Survol (souris seulement) : bordure violette, fond teinté ; le texte ne change pas (« Écrire un message » ouvert le passe en violet).
+   Appui : le bouton s’enfonce, puis revient avec un léger dépassement. */
+@media (hover: hover) { .copier:hover:not(.copie):not(.envoyer) { border-color: var(--fe-primary); background: var(--fe-primary-soft); } }
+.copier:active:not(:disabled) { transform: scale(.96); transition-duration: .25s, .25s, .25s, var(--fe-duration-eclair); transition-timing-function: ease, ease, ease, var(--fe-ease-sortie); }
 .copier .coche { display: none; width: 24px; height: 24px; margin: -2px 0; overflow: visible; }
 .copier.copie { background: var(--fe-primary); border-color: var(--fe-primary); color: var(--fe-on-primary); animation: rebond-bouton .5s cubic-bezier(.3,1.6,.5,1); }
 .copier.copie .enveloppe-ic { display: none; }
@@ -331,6 +335,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
   html { scroll-behavior: auto; }
   .indice-tir { animation: none; }
   .tableau, .tableau-potence { transition: none; }
+  .copier:active:not(:disabled) { transform: none; }
   .tableau.buzz #t-24, .tableau.point #t-paniers { animation: none; }
   .etape { transition: none; }
   .copier.copie { animation: none; }

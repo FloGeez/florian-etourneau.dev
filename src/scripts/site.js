@@ -105,7 +105,7 @@ const aLoisir = window.requestIdleCallback || ((f) => setTimeout(f, 200));
 const prechauffer = () => Object.keys(FORMES).forEach((n, i) => aLoisir(() => echantillon(n, nbForme()), { timeout: 2000 + i * 300 }));
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(prechauffer); else prechauffer();
 // Où tourne l’essaim des oiseaux sans place, section par section — jamais sur le texte
-const repereParcours = document.querySelector('#parcours .repere-section'), titre = document.querySelector('.accueil h1');
+const titre = document.querySelector('.accueil h1');
 const ellipse = (x, y, rx, ry) => ({ x: x + scrollX, y: y + scrollY, rx, ry });
 const orbiteAccueil = () => {
   const s = scene.getBoundingClientRect(), h = titre.getBoundingClientRect();
@@ -113,12 +113,33 @@ const orbiteAccueil = () => {
   return ellipse(s.left + s.width * 0.5, s.top + s.height * 0.1, s.width * 0.3, s.height * 0.08);
 };
 const orbiteForme = (el) => () => { const r = el.getBoundingClientRect(); return ellipse(r.left + r.width / 2, r.top - 12, r.width * 0.3, 22); };
+// Parcours : l’essaim va et vient le long d’un L, jamais sur la liste : au-dessus d’elle, à droite du titre
+// « parcours », puis dans la marge droite, sur la hauteur de l’écran. Quand le haut de la liste est passé, il ne reste que la marge.
+const ESSAIM_PARCOURS = 40;
+const repereParcours = document.querySelector('#parcours .repere-section');
+const margeParcours = () => innerWidth - liste.getBoundingClientRect().right;
 const orbiteParcours = () => {
-  const r = repereParcours.getBoundingClientRect(), l = liste.getBoundingClientRect();
-  // le repère est au-dessus de la liste : sur grand écran, l’essaim tourne à sa droite, là où la ligne est vide
-  if (innerWidth > 860) return ellipse(l.left + l.width * 0.62, (r.top + r.bottom) / 2, l.width * 0.26, Math.max(22, r.height / 2));
-  return ellipse(l.left + l.width * 0.55, r.top - 44, l.width * 0.32, 22);
+  const l = liste.getBoundingClientRect(), r = repereParcours.getBoundingClientRect();
+  const x = innerWidth - margeParcours() / 2, bas = Math.min(innerHeight * 0.8, l.bottom);
+  const haut = (r.top + r.bottom) / 2;
+  const pts = haut > 80 ? [[l.left + l.width * 0.5, haut], [x, haut], [x, bas]] : [[x, innerHeight * 0.15], [x, bas]];
+  return { chemin: pts.map(([px, py]) => [px + scrollX, py + scrollY]) };
 };
+// Contact : 3 oiseaux sur « Copier », 2 sur « Écrire un message » (2 sur « Copier » seulement, sur petit écran), sur le bord du haut
+const pointsBoutons = () => {
+  const places = innerWidth < 700 ? [['copier', 2]] : [['copier', 3], ['ecrire', 2]];
+  return places.flatMap(([id, n]) => {
+    const el = document.getElementById(id);
+    if (!el || el.hidden) return [];
+    const r = el.getBoundingClientRect();
+    return Array.from({ length: n }, (_, i) => [r.left + scrollX + 16 + i * 13, r.top + scrollY]);
+  });
+};
+// Les boutons changent de taille (« Copié », « Écrire un message » qui apparaît) : les oiseaux se recalent
+if ('ResizeObserver' in window) {
+  const recaler = new ResizeObserver(() => { if (cle === 'depart') decider(true); });
+  ['copier', 'ecrire'].forEach((id) => { const el = document.getElementById(id); if (el) recaler.observe(el); });
+}
 const liste = document.querySelector('.parcours'), famille = document.querySelector('.famille');
 let cle = '', premier = true;
 const decider = (force) => {
@@ -126,8 +147,10 @@ const decider = (force) => {
   const rs = recit.getBoundingClientRect(), rl = liste.getBoundingClientRect(), rf = famille.getBoundingClientRect();
   if (scrollY < Math.max(30, seuilEnvol() * 0.6)) { c = 'fil'; f = () => nuee.perch(pointsFil(), premier || force, innerWidth < 700 ? 'doubler' : 'tourner', null, orbiteAccueil); }
   else if (rs.top < vh * 0.55 && rs.bottom > vh * 0.6) { const n = formeActive(); c = 'forme:' + n; const el = zoneForme(); f = () => nuee.perch(pointsForme(n.split('@')[0], el), force && cle === c, 'tourner', origine(el), orbiteForme(el)); }
-  else if (rl.top < vh * 0.75 && rl.bottom > vh * 0.35) { c = 'parcours'; f = () => nuee.perch(pointsParcours(), force && cle === 'parcours', 'tourner', null, orbiteParcours); }
-  else if (rf.top < vh * 0.85) { c = 'depart'; f = () => nuee.scatter(); }
+  // sur le parcours, un petit essaim tourne dans la marge de droite s’il y en a une ; les autres oiseaux sans place quittent l’écran
+  else if (rl.top < vh * 0.75 && rl.bottom > vh * 0.35) { c = 'parcours'; f = () => nuee.perch(pointsParcours(), force && cle === 'parcours', margeParcours() >= 140 ? 'tourner' : 'partir', null, orbiteParcours, ESSAIM_PARCOURS); }
+  // la liste passée, la nuée s’en va, sauf quelques oiseaux qui se posent sur les boutons du contact (farouches)
+  else if (rf.top < vh * 0.85 || rl.bottom <= vh * 0.35) { c = 'depart'; f = () => nuee.perch(pointsBoutons(), false, 'partir', null, null, Infinity, true); }
   else { c = 'vol'; f = () => nuee.fly(); }
   if (c !== cle || force) { cle = c; f(); }
   premier = false;

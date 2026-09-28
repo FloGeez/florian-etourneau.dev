@@ -104,7 +104,9 @@ export const server = {
         console.error('[contact] RESEND_API_KEY manquante');
         throw new ActionError({ code: 'SERVICE_UNAVAILABLE', message: `L’envoi n’est pas encore configuré : ${INJOIGNABLE}` });
       }
-      const { nom, email, message } = entree;
+      const { email, message } = entree;
+      // Le nom finit dans l’en-tête Reply-To : sans « < > , ; " », il ne peut pas y glisser une autre adresse.
+      const nom = entree.nom.replace(/[<>,;"\\]/g, '').trim() || 'Anonyme';
       const reponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
