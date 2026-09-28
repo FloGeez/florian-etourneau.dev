@@ -1,7 +1,8 @@
 /* La nuée — une murmuration d'étourneaux qui accompagne toute la page.
  * Un canvas fixe derrière le contenu ; les oiseaux vivent en coordonnées de document.
- *   const n = createNuee(canvas, { count: 170, colors: ['#5B2A9E', '#2A1245'] });
- *   n.perch(points)  // se poser sur une liste de points [x, y] (coordonnées document)
+ *   const n = createNuee(canvas, { count: 170, colors: ['#5B2A9E', '#2A1245'], debug: false });
+ *   n.perch(points, options)  // se poser sur une liste de points [x, y] (coordonnées document) ; options : voir perch
+ *   (le choix de la scène, section par section, revient au moteur : moteur-nuee.js)
  *   n.fly()          // voler librement dans la marge du viewport
  *   n.scatter()      // quitter l'écran
  */
@@ -54,13 +55,15 @@ export function createNuee(canvas, opts = {}) {
     const u = lg[i] ? Math.min(1, s / lg[i]) : 0, a = pts[i], z = pts[i + 1] || a;
     return [a[0] + (z[0] - a[0]) * u + Math.cos(now * 0.87) * 14, a[1] + (z[1] - a[1]) * u + Math.sin(now * 1.13) * 14];
   }
-  // reste : que font les oiseaux sans place ? 'voler' (défaut), 'doubler' (se serrer à côté d’un autre), 'partir'
-  // anc : fonction qui renvoie l’origine [x, y] (document) des points T ; la forme suit alors un élément qui bouge (position sticky…)
-  // orb : fonction qui renvoie l’ellipse {x, y, rx, ry} (document) où tournent les oiseaux sans place (reste = 'tourner'),
-  //       ou un chemin {chemin: [[x, y], …]} (document) le long duquel ils vont et viennent
-  // garder : avec 'tourner', le nombre d’oiseaux sans place qui tournent ; les autres partent (tous tournent par défaut)
-  // farouches : les oiseaux posés s’envolent à l’approche de la souris (voir effrayer)
-  function perch(T, instant, reste = 'voler', anc = null, orb = null, garder = Infinity, farouches = false) {
+  // Se poser sur les points T. Options :
+  //   instant : les oiseaux sont posés d’un coup (premier affichage, redimensionnement)
+  //   reste : que font les oiseaux sans place ? 'voler' (défaut), 'doubler' (se serrer à côté d’un autre), 'tourner' (dans la zone), 'partir'
+  //   ancre : fonction qui renvoie l’origine [x, y] (document) des points T ; la forme suit alors un élément qui bouge (position sticky…)
+  //   zone : fonction qui renvoie l’ellipse {x, y, rx, ry} (document) où tournent les oiseaux sans place (reste = 'tourner'),
+  //          ou un chemin {chemin: [[x, y], …]} (document) le long duquel ils vont et viennent
+  //   garder : avec 'tourner', le nombre d’oiseaux sans place qui tournent ; les autres partent (tous tournent par défaut)
+  //   farouches : les oiseaux posés s’envolent à l’approche de la souris (voir effrayer)
+  function perch(T, { instant = false, reste = 'voler', ancre: anc = null, zone: orb = null, garder = Infinity, farouches = false } = {}) {
     calme = false; farouche = farouches;
     mode = 'perch'; orbite = reste === 'tourner' ? orb : null;
     // la nuée se reforme : les oiseaux posés s’envolent l’un après l’autre, de gauche à droite
@@ -189,6 +192,20 @@ export function createNuee(canvas, opts = {}) {
       }
     }
     ctx.globalAlpha = 1;
+    if (opts.debug) dessinerDebug();
+  }
+  // ?debug : les places (croix), la zone où tourne l’essaim (ellipse ou chemin) et son point d’attraction
+  function dessinerDebug() {
+    ctx.save(); ctx.lineWidth = 1; ctx.strokeStyle = '#C8612E'; ctx.fillStyle = '#C8612E';
+    for (const b of B) if (b.t) { const x = b.t[0] + org[0], y = b.t[1] + org[1]; ctx.beginPath(); ctx.moveTo(x - 2, y - 2); ctx.lineTo(x + 2, y + 2); ctx.moveTo(x + 2, y - 2); ctx.lineTo(x - 2, y + 2); ctx.stroke(); }
+    if (O) {
+      ctx.setLineDash([4, 4]); ctx.beginPath();
+      if (O.chemin) O.chemin.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      else ctx.ellipse(O.x, O.y, O.rx, O.ry, 0, 0, Math.PI * 2);
+      ctx.stroke(); ctx.setLineDash([]);
+      if (O.point) { ctx.beginPath(); ctx.arc(O.point[0], O.point[1], 4, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.restore();
   }
   // au repos (tous posés, rien ne bouge) on ne recalcule plus : on redessine seulement au défilement ou au redimensionnement
   let calme = false, besoin = true;

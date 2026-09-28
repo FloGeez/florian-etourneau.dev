@@ -1,6 +1,8 @@
 /* Où se pose la nuée, section par section : le fil de l’accueil, les pictos de « maintenant », les lignes du parcours,
-   les boutons du contact. decider() choisit la scène selon le défilement ; majEtape() suit l’étape du récit en cours. */
+   les boutons du contact. Chaque section est une scène du moteur (moteur-nuee.js) ; majEtape() suit l’étape du récit en cours.
+   Avec ?debug dans l’adresse : la scène en cours, les places et la zone de l’essaim s’affichent. */
 import { createNuee } from './nuee.js';
+import { creerMoteur } from './moteur-nuee.js';
 import { initTheme } from './theme.js';
 import { FORMES, echantillon, minuteRennes } from './formes.js';
 import { G } from './scene-accueil.js';
@@ -8,10 +10,11 @@ import { G } from './scene-accueil.js';
 const root = document.documentElement;
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const css = (n) => getComputedStyle(root).getPropertyValue(n).trim();
+const debug = new URLSearchParams(location.search).has('debug');
 
 export function initNuee({ scene, VB, seuilEnvol }) {
   const couleurs = () => [css('--fe-oiseaux'), css('--fe-oiseaux'), css('--fe-oiseaux-2')];
-  const nuee = createNuee(document.getElementById('nuee'), { count: innerWidth <= 860 ? 200 : 320, colors: couleurs() });
+  const nuee = createNuee(document.getElementById('nuee'), { count: innerWidth <= 860 ? 200 : 320, colors: couleurs(), debug });
   initTheme(() => nuee.setColors(couleurs()));
 
   const pointsFil = () => {
@@ -60,7 +63,6 @@ export function initNuee({ scene, VB, seuilEnvol }) {
     const n = f.length > 1 && !reduit ? f[Math.floor(performance.now() / 3500) % f.length] : f[0];
     return n === 'rennes' ? n + '@' + minuteRennes() : n;
   };
-  setInterval(() => { if (cle.startsWith('forme:')) decider(); }, 500);
   // Prépare les formes pendant les temps morts, pour que la nuée parte sans à-coup
   const aLoisir = window.requestIdleCallback || ((f) => setTimeout(f, 200));
   const prechauffer = () => Object.keys(FORMES).forEach((n, i) => aLoisir(() => echantillon(n, nbForme()), { timeout: 2000 + i * 300 }));
@@ -96,30 +98,47 @@ export function initNuee({ scene, VB, seuilEnvol }) {
       return Array.from({ length: n }, (_, i) => [r.left + scrollX + 16 + i * 13, r.top + scrollY]);
     });
   };
+  const liste = document.querySelector('.parcours'), famille = document.querySelector('.famille');
+  const vh = () => innerHeight;
+
+  /* Les scènes, de haut en bas : la première active l’emporte (moteur-nuee.js). Aucune : la nuée vole librement. */
+  const moteur = creerMoteur(nuee, [
+    // l’accueil : sur le fil ; les oiseaux sans place tournent à droite du titre (sur petit écran, ils se serrent sur le fil)
+    {
+      nom: 'fil',
+      active: () => scrollY < Math.max(30, seuilEnvol() * 0.6),
+      pose: ({ premiere, force }) => ({ places: pointsFil(), instant: premiere || force, reste: innerWidth < 700 ? 'doubler' : 'tourner', zone: orbiteAccueil }),
+    },
+    // « maintenant » : le picto de l’étape en cours, dans la scène collée ; l’essaim tourne au-dessus
+    {
+      nom: 'forme',
+      active: () => { const r = recit.getBoundingClientRect(); return r.top < vh() * 0.55 && r.bottom > vh() * 0.6; },
+      variante: formeActive,
+      pose: ({ variante }) => { const el = zoneForme(); return { places: pointsForme(variante.split('@')[0], el), ancre: origine(el), reste: 'tourner', zone: orbiteForme(el) }; },
+    },
+    // le parcours : un oiseau posé = deux mois ; un petit essaim dans la marge de droite s’il y en a une, les autres quittent l’écran
+    {
+      nom: 'parcours',
+      active: () => { const r = liste.getBoundingClientRect(); return r.top < vh() * 0.75 && r.bottom > vh() * 0.35; },
+      pose: () => ({ places: pointsParcours(), reste: margeParcours() >= 140 ? 'tourner' : 'partir', zone: orbiteParcours, garder: ESSAIM_PARCOURS }),
+    },
+    // la liste passée, la nuée s’en va, sauf quelques oiseaux qui se posent sur les boutons du contact (farouches)
+    {
+      nom: 'contact',
+      active: () => famille.getBoundingClientRect().top < vh() * 0.85 || liste.getBoundingClientRect().bottom <= vh() * 0.35,
+      pose: () => ({ places: pointsBoutons(), instant: false, reste: 'partir', farouches: true }),
+    },
+  ], { debug });
+
   // Les boutons changent de taille (« Copié », « Écrire un message » qui apparaît) : les oiseaux se recalent
   if ('ResizeObserver' in window) {
-    const recaler = new ResizeObserver(() => { if (cle === 'depart') decider(true); });
+    const recaler = new ResizeObserver(() => { if (moteur.scene === 'contact') moteur.maj(true); });
     ['copier', 'ecrire'].forEach((id) => { const el = document.getElementById(id); if (el) recaler.observe(el); });
   }
-  const liste = document.querySelector('.parcours'), famille = document.querySelector('.famille');
-  let cle = '', premier = true;
-  const decider = (force) => {
-    const vh = innerHeight; let c, f;
-    const rs = recit.getBoundingClientRect(), rl = liste.getBoundingClientRect(), rf = famille.getBoundingClientRect();
-    if (scrollY < Math.max(30, seuilEnvol() * 0.6)) { c = 'fil'; f = () => nuee.perch(pointsFil(), premier || force, innerWidth < 700 ? 'doubler' : 'tourner', null, orbiteAccueil); }
-    else if (rs.top < vh * 0.55 && rs.bottom > vh * 0.6) { const n = formeActive(); c = 'forme:' + n; const el = zoneForme(); f = () => nuee.perch(pointsForme(n.split('@')[0], el), force && cle === c, 'tourner', origine(el), orbiteForme(el)); }
-    // sur le parcours, un petit essaim tourne dans la marge de droite s’il y en a une ; les autres oiseaux sans place quittent l’écran
-    else if (rl.top < vh * 0.75 && rl.bottom > vh * 0.35) { c = 'parcours'; f = () => nuee.perch(pointsParcours(), force && cle === 'parcours', margeParcours() >= 140 ? 'tourner' : 'partir', null, orbiteParcours, ESSAIM_PARCOURS); }
-    // la liste passée, la nuée s’en va, sauf quelques oiseaux qui se posent sur les boutons du contact (farouches)
-    else if (rf.top < vh * 0.85 || rl.bottom <= vh * 0.35) { c = 'depart'; f = () => nuee.perch(pointsBoutons(), false, 'partir', null, null, Infinity, true); }
-    else { c = 'vol'; f = () => nuee.fly(); }
-    if (c !== cle || force) { cle = c; f(); }
-    premier = false;
-  };
-  addEventListener('resize', () => { majEtape(); decider(true); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => decider(true));
-  majEtape(); decider(true);
+  addEventListener('resize', () => { majEtape(); moteur.maj(true); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moteur.maj(true));
+  majEtape(); moteur.maj(true);
 
   // au défilement (une fois par image, voir site.js)
-  return { maj() { majEtape(); decider(); } };
+  return { maj() { majEtape(); moteur.maj(); } };
 }
