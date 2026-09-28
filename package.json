@@ -5,6 +5,7 @@
   "private": true,
   "description": "Site personnel de Florian Etourneau",
   "author": "Florian Etourneau",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

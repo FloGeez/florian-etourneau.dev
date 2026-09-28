@@ -40,10 +40,19 @@ src/
     Pied.astro             contact, heure et météo, la famille sur le fil
   data/parcours.ts         postes et durées (un oiseau = deux mois)
   scripts/
+    site.js                branche les modules ci-dessous et les fait suivre le défilement
     nuee.js                la nuée (canvas fixe, coordonnées document)
+    moteur-nuee.js         le moteur : choisit la scène à l’écran et y pose la nuée
+    scenes.js              les scènes de la page (fil, pictos, parcours, contact) ; ?debug les affiche
     formes.js              les formes que dessine la nuée et leur échantillonnage
+    oiseau.js              l’oiseau articulé (copie de la charte)
+    scene-accueil.js       cadrage de la scène du tir et seuil d’envol
+    tir.js                 le mini-jeu du tir
+    envol.js, vol.js       l’envol de Florian, le battement d’ailes
+    famille.js             le retour au nid, le dribble
+    rennes.js              l’heure et la météo
+    copier.js, entete.js   copier l’adresse, l’en-tête au défilement
     theme.js               la bascule de thème
-    site.js                chorégraphie de la nuée, tir, envol, heure, famille, copier
     air-ball.js            l’animation de la page 404
     contact.js             envoi du formulaire sans rechargement
   styles/
@@ -53,6 +62,7 @@ src/
   pages/404.astro          « Air ball » : la page introuvable
   actions/index.ts         actions `defi` et `contact` : défi ALTCHA, validation, envoi par Resend (seul code serveur)
 outils/copier-tokens.mjs   (local, hors git) recopie tokens.css depuis ../etourneau-identite
+outils/og-image.html       (local, hors git) source de public/og-image.png, commande d’export en tête du fichier
 ```
 
 Les scripts sont des modules ES bundlés par Astro ; ils ciblent les éléments par `id`,
@@ -71,7 +81,14 @@ quand même, protégé par le pot de miel seul. Le domaine `florian-etourneau.de
 (l’expéditeur est `contact@florian-etourneau.dev`) : chaque push sur `main` part en production,
 chaque branche a sa preview. Domaine : `florian-etourneau.dev`.
 
+## Licence
+
+Ce dépôt est public pour être lu, pas pour être réutilisé tel quel (détail dans [`LICENSE`](LICENSE)) :
+
+- **L’identité et le contenu sont à moi, tous droits réservés** : l’étourneau et la famille, les illustrations, les images, les textes, le parcours et les valeurs des tokens. Pas de reprise sans accord écrit.
+- **Le code est sous licence MIT** : libre de s’en servir, à condition d’y remplacer l’oiseau, les textes et les couleurs par les siens.
+- Les marques de tiers (MaxDS, BPGO, GitHub, LinkedIn…) appartiennent à leurs propriétaires.
+
 ## À faire
 
-- Image de partage `og:image` (1200×630).
 - Adresse de contact sur le domaine une fois le mail configuré.

@@ -1,0 +1,56 @@
+florian-etourneau.dev
+Copyright (c) 2026 Florian Etourneau
+
+Ce dépôt est public pour être lu, pas pour être réutilisé tel quel. Il contient deux choses, sous deux régimes.
+
+
+1. L’IDENTITÉ ET LE CONTENU — TOUS DROITS RÉSERVÉS
+
+L’identité visuelle de Florian Etourneau et le contenu du site sont protégés par le droit d’auteur :
+
+- l’étourneau, dans toutes ses poses (logo, oiseau articulé, en vol, au nid), la famille sur le fil,
+  la scène du tir et le tableau d’affichage, tels qu’ils sont dessinés dans les composants (src/components/)
+  et dans les scripts (tracés de l’oiseau, formes de la nuée) ;
+- les images de public/ (favicon, og-image.png) et les pictos ;
+- les valeurs de l’identité : palette, typographies, motifs (src/styles/tokens.css, copie de la charte) ;
+- les textes du site et le parcours (src/data/parcours.ts) ;
+- le nom « Florian Etourneau » utilisé comme signature.
+
+Vous pouvez les consulter ici. Toute reproduction, modification, adaptation ou diffusion, en tout ou partie,
+demande l’accord écrit de l’auteur : florian.etourneau@gmail.com.
+
+
+2. LE CODE — LICENCE MIT
+
+Le code du site est sous licence MIT : scripts (src/scripts/), actions (src/actions/), mise en page et styles
+(src/layouts/, src/styles/global.css), configuration.
+
+La licence porte sur le code, pas sur ce qu’il dessine : les tracés, textes et valeurs de l’identité qu’il
+contient restent soumis à la partie 1. Pour réutiliser le code, remplacez-les par les vôtres.
+
+    MIT License
+
+    Copyright (c) 2026 Florian Etourneau
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+    associated documentation files (the "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+    following conditions:
+
+    The above copyright notice and this permission notice shall be included in all copies or substantial
+    portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+    EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+    USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+3. MARQUES ET ŒUVRES DE TIERS
+
+Les noms et logos de tiers cités ou représentés (MaxDS, BPGO, les anciens employeurs, GitHub, LinkedIn…)
+appartiennent à leurs propriétaires ; les logos GitHub et LinkedIn de public/icons/ sont utilisés selon
+leurs règles d’usage, pour renvoyer vers les profils de l’auteur. Les polices Bricolage Grotesque et
+JetBrains Mono sont sous licence SIL Open Font License et chargées depuis Google Fonts.
