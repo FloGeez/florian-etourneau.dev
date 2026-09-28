@@ -128,6 +128,13 @@
   --fe-tracking-h3: -0.01em;
   --fe-page-largeur: 1200px;
   --fe-page-gouttiere: clamp(16px, 5vw, 120px);
+  --fe-duration-eclair: 130ms;
+  --fe-duration-courte: 250ms;
+  --fe-duration-moyenne: 450ms;
+  --fe-duration-longue: 650ms;
+  --fe-ease-sortie: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --fe-ease-depassement: cubic-bezier(0.3, 1.6, 0.5, 1);
+  --fe-ease-entree-sortie: cubic-bezier(0.65, 0, 0.35, 1);
   --fe-bg: #FBF6EF;
   --fe-surface: #FFFFFF;
   --fe-surface-2: #F1ECE5;

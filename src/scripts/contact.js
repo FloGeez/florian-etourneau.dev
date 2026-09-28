@@ -6,6 +6,7 @@
 import { actions, isInputError } from 'astro:actions';
 import { solveChallenge } from 'altcha-lib';
 import { deriveKey } from 'altcha-lib/algorithms/web/pbkdf2';
+import { ailesVol, bobVol } from './oiseau.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ECHEC = 'L’envoi a échoué. Réessaie, ou écris-moi directement à l’adresse ci-dessus.';
@@ -59,7 +60,8 @@ function envolEnveloppe({ pied, formulaire, scene, fin }) {
   scene.setAttribute('width', W); scene.setAttribute('height', H); scene.setAttribute('viewBox', `0 0 ${W} ${H}`);
   const feuille = scene.querySelector('#envoi-feuille'), rabat = scene.querySelector('#envoi-rabat'), lettre = scene.querySelector('#envoi-lettre');
   const oiseau = scene.querySelector('#envoi-oiseau'), trace = scene.querySelector('#envoi-trace');
-  const haut = oiseau.querySelector('.ailes-haut'), bas = oiseau.querySelector('.ailes-bas');
+  const pres = oiseau.querySelector('.vol-pres'), loin = oiseau.querySelector('.vol-loin'), dedans = oiseau.querySelector('.vol-dedans');
+  let battu = 0, tPrec = 0; // position dans le cycle de battement, pilotée par le temps
 
   // La feuille part du formulaire et se plie en enveloppe, au centre du formulaire.
   const F = { x: r.left - p.left, y: r.top - p.top, w: r.width, h: r.height };
@@ -118,7 +120,10 @@ function envolEnveloppe({ pied, formulaire, scene, fin }) {
       }
     }
     oiseau.setAttribute('transform', `translate(${pos[0].toFixed(1)},${pos[1].toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${s}) translate(-114,-80)`);
-    const battement = Math.floor(t / (t > T.prise ? 70 : 90)) % 2 === 0; haut.toggleAttribute('hidden', !battement); bas.toggleAttribute('hidden', battement);
+    // battement continu : 5,5 par seconde à l’approche, 7 avec l’enveloppe
+    battu += (t - tPrec) / 1000 * (t > T.prise ? 7 : 5.5); tPrec = t;
+    const ailes = ailesVol(battu); pres.setAttribute('d', ailes.pres); loin.setAttribute('d', ailes.loin);
+    dedans.setAttribute('transform', `translate(0 ${bobVol(battu, 0, 0.8).toFixed(2)})`); // à 7 battements/s, un grand mouvement du corps vibrerait
     lettre.setAttribute('transform', `translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(${rot.toFixed(1)}) scale(${rebond.toFixed(3)})`);
 
     // 3. La confirmation prend la place du formulaire pendant que l’oiseau s’éloigne.

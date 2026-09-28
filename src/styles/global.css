@@ -107,8 +107,6 @@ h1 .deux { color: var(--fe-primary); display: block; }
 
 /* Le tir : l’aile lève le ballon, on vise, on lâche */
 #oiseau-pose { overflow: visible; }
-#oiseau-pose.arme #aile-pliee { display: none; }
-#oiseau-pose:not(.arme) #aile-levee { display: none; }
 #ballon, #tireur { pointer-events: auto; touch-action: none; cursor: grab; }
 #ballon:active, .scene.vise #ballon { cursor: grabbing; }
 #ballon:focus { outline: none; }
@@ -301,9 +299,8 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .famille { display: block; width: 100%; height: auto; overflow: visible; }
 /* Retour au nid : Florian traverse la page et se pose à sa place */
 #nid { transform-box: view-box; }
+#nid svg { overflow: visible; } /* l’aile levée dépasse du cadre au moment de se poser */
 #nid.attend { opacity: 0; }
-#nid.pose { animation: se-poser .45s cubic-bezier(.3,.6,.3,1); transform-box: fill-box; transform-origin: 50% 100%; }
-@keyframes se-poser { 0% { transform: translateY(-4px) scaleY(1.02); } 45% { transform: translateY(1px) scaleY(.94); } 100% { transform: none; } }
 /* Le fils du milieu dribble six fois, puis garde le ballon (clic pour relancer) */
 .dribble-ballon { transform-box: fill-box; transform-origin: 50% 100%; }
 .dribbleur { cursor: pointer; }
@@ -340,5 +337,4 @@ h1 .deux { color: var(--fe-primary); display: block; }
   .copier.copie .coche-trace { animation: none; stroke-dashoffset: 0; }
   .copier.copie .coche-ballon { animation: none; opacity: 0; }
   #adresse { transition: none; }
-  #nid.pose { animation: none; }
 }

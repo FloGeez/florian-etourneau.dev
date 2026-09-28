@@ -3,6 +3,8 @@ import { createNuee } from './nuee.js';
 import { initTheme } from './theme.js';
 import { FORMES, echantillon, minuteRennes } from './formes.js';
 import { initContact } from './contact.js';
+import { aile, pointsAile, BOUT_AILE, opaciteAileDessus, transformTete, opacitesBec, DUREE_TETE, DUREES, courbes, clamp, lerp, seg, bump, rotP, corpsPose, pattesPose, placerVol, ailesVol, bobVol, avancerVol, POSE } from './oiseau.js';
+import { animer } from './horloge.js';
 
 const root = document.documentElement;
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -143,33 +145,78 @@ addEventListener('scroll', surDefile, { passive: true }); surDefile();
 
 
 /* Le tir : à toi de jouer. L’aile lève le ballon ; on tire vers l’arrière, on vise, on lâche.
-   Le tableau d’affichage compte les paniers, les tirs et les 24 secondes. */
+   Le tableau d’affichage compte les paniers, les tirs et les 24 secondes.
+   L’oiseau est articulé (src/scripts/oiseau.js) : la même aile passe de pliée à levée par l’avant, sans jamais
+   passer derrière le corps ; la tête suit le ballon pendant qu’il vole. */
 const tir = (() => {
   const svg = scene, ballon = document.getElementById('ballon'), filet = document.getElementById('filet');
-  const aile = document.getElementById('aile-levee'), oiseau = document.getElementById('oiseau-pose');
+  const ailePliee = document.getElementById('aile-pliee'), aileDessus = document.getElementById('aile-dessus');
+  const corpsEl = document.getElementById('corps-pose'), pattesEl = document.getElementById('pattes-pose');
+  const teteEl = document.getElementById('tete-pose'), crane = document.getElementById('crane-pose');
+  const becFace = document.getElementById('bec-face'), becProfil = teteEl.querySelector('.fe-bec');
   const trace = document.getElementById('trajectoire'), indice = document.getElementById('indice-tir');
   const visee = document.getElementById('visee'), vDir = document.getElementById('visee-dir'), vForce = document.getElementById('visee-force');
   const tableau = document.getElementById('tableau'), tPaniers = document.getElementById('t-paniers'), tTirs = document.getElementById('t-tirs'), t24 = document.getElementById('t-24');
-  const G = 930, R = 16, EP = [96, 100], BOUT = [130, -12], VMAX = 820;
+  const G = 930, R = 16, EP = POSE.EPAULE, VMAX = 820;
   const OX = 660.6, OY = 190.8, KO = 130 / 140;
   const versScene = (lx, ly) => [OX + (lx - 40) * KO, OY + (ly - 24) * KO];
-  const main = (ang) => {
-    const a = ang * Math.PI / 180, dx = BOUT[0] - EP[0], dy = BOUT[1] - EP[1];
-    const tx = dx * Math.cos(a) - dy * Math.sin(a), ty = dx * Math.sin(a) + dy * Math.cos(a), n = Math.hypot(tx, ty);
-    return versScene(EP[0] + tx + tx / n * 20, EP[1] + ty + ty / n * 20);
+  // leve : 0 aile pliée → 1 aile levée ; angle : rotation en plus, autour de l’épaule, une fois l’aile levée (visée, tir)
+  let leve = 1, bascule = 0, hauteur = 0, corps = corpsPose();
+  // la main : le bout de l’aile, prolongé de 20 unités ; à leve = 1 et angle = 0, c’est l’ancien point (130, −12) + 20
+  const main = (ang, t = leve) => {
+    const b = rotP(pointsAile(t)[BOUT_AILE], ang, EP), dx = b[0] - EP[0], dy = b[1] - EP[1], n = Math.hypot(dx, dy);
+    const q = corps.point([b[0] + dx / n * 20, b[1] + dy / n * 20]);
+    return versScene(q[0], q[1]);
   };
   const filY = (x) => { const t = x / 1200; return 340 + 40 * t * (1 - t); };
-  const REPLI = -150;
-  let etat = 'main', x = 0, y = 0, vx = 0, vy = 0, rot = 0, raf = 0, tirs = 0, paniers = 0, compte = false, prise = null, parti = false, points = [];
+  let etat = 'main', x = 0, y = 0, vx = 0, vy = 0, rot = 0, tirs = 0, paniers = 0, compte = false, prise = null, parti = false, points = [];
   const placer = () => ballon.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)})`);
-  const lever = (a) => aile.setAttribute('transform', `rotate(${a.toFixed(1)} ${EP[0]} ${EP[1]})`);
-  let angle = 0; const tenir = () => { [x, y] = main(angle); placer(); };
-  const orienter = (a) => { angle = a; lever(a); };
+  let angle = 0;
+  function dessinerOiseau() {
+    corps = corpsPose({ bascule, dy: hauteur });
+    corpsEl.setAttribute('transform', corps.transform);
+    pattesEl.setAttribute('d', pattesPose({ bascule, dy: hauteur }));
+    const d = aile(leve), r = `rotate(${angle.toFixed(1)} ${EP[0]} ${EP[1]})`;
+    ailePliee.setAttribute('d', d); ailePliee.setAttribute('transform', r);
+    aileDessus.setAttribute('d', d); aileDessus.setAttribute('transform', r);
+    aileDessus.style.opacity = opaciteAileDessus(leve).toFixed(3);
+  }
+  const tenir = () => { [x, y] = main(angle); placer(); };
+  const orienter = (a) => { angle = a; dessinerOiseau(); };
+
+  /* La tête : un coup sec pour se retourner, puis elle tient ; l’inclinaison suit le ballon en douceur */
+  const tete = { sens: 1, depuis: 1, cible: 1, t: 1, penche: 0, ciblePenche: 0, actif: false };
+  const TETE = versScene(119, 58), POITRINE_X = versScene(...POSE.POITRINE)[0];
+  function dessinerTete() {
+    const tr = transformTete(tete.sens, tete.penche); teteEl.setAttribute('transform', tr); crane.setAttribute('transform', tr);
+    const o = opacitesBec(tete.sens); becProfil.style.opacity = o.profil.toFixed(3); becFace.style.opacity = o.face.toFixed(3);
+  }
+  function majTete(dt) {
+    tete.t = Math.min(1, tete.t + dt / DUREE_TETE);
+    tete.sens = lerp(tete.depuis, tete.cible, courbes.entreeSortie(tete.t));
+    tete.penche += (tete.ciblePenche - tete.penche) * (1 - Math.exp(-dt / 0.08));
+    const fini = tete.t >= 1 && Math.abs(tete.ciblePenche - tete.penche) < 0.05;
+    if (fini) tete.penche = tete.ciblePenche;
+    dessinerTete();
+    if (fini) { tete.actif = false; return false; }
+  }
+  function regarder(sens, penche) {
+    if (sens !== tete.cible) { tete.depuis = tete.sens; tete.cible = sens; tete.t = 0; }
+    tete.ciblePenche = penche;
+    if (reduit) { tete.sens = sens; tete.t = 1; tete.penche = penche; dessinerTete(); return; }
+    if (!tete.actif) { tete.actif = true; animer(majTete); }
+  }
+  // le ballon derrière l’oiseau : il se retourne ; devant : il le suit du bec
+  function suivreBallon() {
+    const sens = x < POITRINE_X ? -1 : 1;
+    const a = Math.atan2(y - TETE[1], sens > 0 ? x - TETE[0] : TETE[0] - x) * 180 / Math.PI;
+    regarder(sens, sens * clamp(a, -20, 14));
+  }
   const swish = () => { if (filet.animate) filet.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(1.2)' }, { transform: 'scaleY(.95)' }, { transform: 'scaleY(1)' }], { duration: 520, easing: 'ease-out' }); };
   filet.style.transformBox = 'fill-box'; filet.style.transformOrigin = '50% 0';
   // « à toi de tirer » : à 24 px du ballon (grille de 4), du côté où il y a la place
   const placerIndice = () => {
-    const W = svg.clientWidth, k = W / VB.w, [bx, by] = main(0);
+    const W = svg.clientWidth, k = W / VB.w, [bx, by] = main(0, 1);
     // version courte quand la longue toucherait le cercle du panier (tablette, mobile)
     const libelle = indice.querySelector('span'), cercleG = (988 - VB.x) * k;
     libelle.textContent = 'à toi de tirer';
@@ -183,8 +230,12 @@ const tir = (() => {
   };
   placerIndice(); addEventListener('resize', placerIndice);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(placerIndice);
-  const anim = (duree, f, fin) => { const t0 = performance.now(); const pas = (now) => { const u = Math.min(1, (now - t0) / duree); f(u); if (u < 1) requestAnimationFrame(pas); else if (fin) fin(); }; requestAnimationFrame(pas); };
-  const doux = (u) => 1 - Math.pow(1 - u, 3);
+  // les gestes de l’aile : un nouveau geste interrompt le précédent
+  let geste = 0;
+  const anim = (duree, f, fin) => {
+    const id = ++geste; let e = 0;
+    animer((dt) => { if (id !== geste) return false; e += dt * 1000; const u = Math.min(1, e / duree); f(u); if (u >= 1) { if (fin) fin(); return false; } });
+  };
   const deux = (n) => String(Math.min(99, n)).padStart(2, '0');
 
   /* Le tableau Bodet n’apparaît qu’à la première prise de ballon : il descend de ses câbles */
@@ -203,11 +254,25 @@ const tir = (() => {
   }
   const majTableau = (flash) => { tPaniers.textContent = deux(paniers); tTirs.textContent = deux(tirs); if (flash) { tableau.classList.remove('point'); void tableau.offsetWidth; tableau.classList.add('point'); } };
 
+  // lever l’aile (--fe-duration-longue) : 100 ms d’anticipation, puis 550 ms avec un léger dépassement ; le corps recule de 3°
   function soulever() {
-    etat = 'leve'; oiseau.classList.add('arme'); rot = 0; points = []; trace.setAttribute('d', '');
-    orienter(REPLI); tenir(); ballon.style.opacity = 1;
-    if (reduit) { orienter(0); tenir(); etat = 'main'; return; }
-    anim(650, (u) => { orienter(REPLI * (1 - doux(u))); tenir(); }, () => { etat = 'main'; });
+    etat = 'leve'; rot = 0; points = []; trace.setAttribute('d', ''); angle = 0;
+    regarder(1, 0);
+    if (reduit) { leve = 1; bascule = 0; dessinerOiseau(); tenir(); ballon.style.opacity = 1; etat = 'main'; return; }
+    ballon.style.opacity = 0;
+    anim(DUREES.longue * 1000, (u) => {
+      const a = seg(u, 0, 0.15), b = seg(u, 0.15, 1);
+      leve = u < 0.15 ? -0.05 * courbes.entree(a) : -0.05 + 1.05 * courbes.depassement(b, 1.3);
+      bascule = -3 * courbes.douce(b);
+      dessinerOiseau(); tenir();
+      if (b > 0.3) ballon.style.opacity = 1; // le ballon apparaît quand l’aile passe devant le ventre
+    }, () => { etat = 'main'; });
+  }
+  // replier l’aile (--fe-duration-moyenne), sans à-coup
+  function replier() {
+    const l0 = leve, b0 = bascule, a0 = angle;
+    if (reduit) { leve = 0; bascule = 0; angle = 0; dessinerOiseau(); return; }
+    anim(DUREES.moyenne * 1000, (u) => { const k = courbes.entreeSortie(u); leve = l0 * (1 - k); bascule = b0 * (1 - k); angle = a0 * (1 - k); dessinerOiseau(); });
   }
   function revenir(delai) {
     setTimeout(() => {
@@ -216,25 +281,26 @@ const tir = (() => {
       setTimeout(() => { remise24(); trace.style.opacity = 1; if (etat === 'repos' && !parti) soulever(); }, 260);
     }, delai);
   }
-  function lacherAuSol() { etat = 'vol'; vx = 30; vy = 0; compte = true; oiseau.classList.remove('arme'); physique(); }
+  function lacherAuSol() { etat = 'vol'; vx = 30; vy = 0; compte = true; replier(); physique(); }
   function lacher(v0x, v0y) {
     etat = 'vol'; vx = v0x; vy = v0y; compte = false; tirs++; majTableau(false);
     indice.classList.add('parti'); points = [[x, y]];
-    anim(140, (u) => orienter(-12 + 42 * u), () => anim(300, (u) => orienter(30 * (1 - u)), () => oiseau.classList.remove('arme')));
+    anim(140, (u) => orienter(-12 + 42 * u), () => anim(300, (u) => orienter(30 * (1 - u)), replier));
     physique();
   }
+  let vols = 0;
   function physique() {
-    cancelAnimationFrame(raf); let prec = performance.now();
-    const pas = (now) => {
-      const dt = Math.min(0.033, (now - prec) / 1000); prec = now;
+    const id = ++vols;
+    animer((dtBrut) => {
+      if (id !== vols) return false;
+      const dt = Math.min(0.033, dtBrut);
       for (let i = 0; i < 3 && etat !== 'repos'; i++) avancer(dt / 3);
       placer();
       // les pointillés se dessinent derrière le ballon
       if (points.length) { const [lx, ly] = points[points.length - 1]; if (Math.hypot(x - lx, y - ly) > 10) { points.push([x, y]); trace.setAttribute('d', 'M' + points.map((p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L')); } }
-      if (etat === 'repos') { stop24(); revenir(1100); return; }
-      raf = requestAnimationFrame(pas);
-    };
-    raf = requestAnimationFrame(pas);
+      if (etat === 'vol') suivreBallon();
+      if (etat === 'repos') { stop24(); revenir(1100); return false; }
+    });
   }
   const CERCLE = [[988.2, 159.5], [1071.8, 159.5]];
   function avancer(dt) {
@@ -297,37 +363,81 @@ const tir = (() => {
     }
   });
   afficher24(); majTableau(false);
-  if (reduit) { orienter(0); tenir(); } else { oiseau.classList.add('arme'); orienter(REPLI); tenir(); etat = 'leve'; setTimeout(soulever, 600); }
+  if (reduit) { leve = 1; orienter(0); tenir(); } else { leve = 0; dessinerOiseau(); ballon.style.opacity = 0; etat = 'leve'; setTimeout(soulever, 600); }
   return {
-    envol(estParti) {
+    // Décoller : pas de geste intermédiaire (au défilement, il arrivait trop tard). Le relais vers l’oiseau en vol est immédiat,
+    // à la même place et à la même taille ; surRelais reçoit la poitrine (repère de la scène).
+    envol(estParti, surRelais) {
       if (estParti === parti) return; parti = estParti;
-      if (parti && (etat === 'main' || etat === 'leve')) { prise = null; visee.setAttribute('hidden', ''); svg.classList.remove('vise'); lacherAuSol(); }
-      if (!parti && etat === 'repos') revenir(350);
+      if (parti) {
+        if (etat === 'main' || etat === 'leve') { prise = null; visee.setAttribute('hidden', ''); svg.classList.remove('vise'); lacherAuSol(); }
+        geste++; hauteur = 0; bascule = 0; angle = 0; dessinerOiseau();
+        surRelais(versScene(...corps.point(POSE.POITRINE)));
+      } else {
+        // retour sur le fil : l’oiseau reprend sa pose ; s’il n’a plus le ballon, il le reprend
+        geste++; hauteur = 0; bascule = 0; angle = 0; leve = etat === 'main' || etat === 'leve' ? 1 : 0; dessinerOiseau();
+        if (etat === 'repos') revenir(350);
+      }
     },
   };
 })();
 
 /* L’envol de Florian, avec la nuée */
 const pose = document.getElementById('oiseau-pose'), vol = document.getElementById('oiseau-vol');
-const haut = vol.querySelector('.ailes-haut'), bas = vol.querySelector('.ailes-bas');
 // Le vol suit le sens de lecture : l’oiseau décolle, puis plonge vers la suite de la page (en bas à droite de l’écran).
 // Le trajet est défini à l’écran, puis ramené dans les coordonnées de la scène.
 const bez = (P, u) => { const a = 1 - u; return [0, 1].map((k) => a * a * a * P[0][k] + 3 * a * a * u * P[1][k] + 3 * a * u * u * P[2][k] + u * u * u * P[3][k]); };
-let battement = 0;
+// Les ailes battent au rythme du temps ; le défilement ne pilote que la trajectoire.
+// L’étourneau bat en montant et plane en piquant (plane → 1, ailes tenues à tPlane).
+function battement(g) {
+  const pres = g.querySelector('.vol-pres'), loin = g.querySelector('.vol-loin'), dedans = g.querySelector('.vol-dedans');
+  const st = { c: 0, plane: 0, cible: 0, tPlane: 0.3, actif: false };
+  const dessiner = () => {
+    const a = ailesVol(st.c, st.plane, st.tPlane);
+    pres.setAttribute('d', a.pres); loin.setAttribute('d', a.loin);
+    dedans.setAttribute('transform', `translate(0 ${bobVol(st.c, st.plane).toFixed(2)})`);
+  };
+  const maj = (dt) => {
+    if (!st.actif) return false;
+    avancerVol(st, dt, st.cible);
+    dessiner();
+    if (st.chaqueImage) st.chaqueImage(dt);
+  };
+  return { st, dessiner, demarrer() { if (st.actif || reduit) return; st.actif = true; animer(maj); }, arreter() { st.actif = false; } };
+}
+const ailesEnvol = battement(vol);
+const KO_POSE = 130 / 140; // échelle de l’oiseau posé dans la scène : l’oiseau en vol part à la même taille
+let decolle = false, relais = null, volP = 0;
+function placerEnVol() {
+  const r = scene.getBoundingClientRect(), k = r.width / VB.w, W = innerWidth, H = innerHeight;
+  // la trajectoire part de la poitrine de l’oiseau au relais, puis plonge vers la suite de la page
+  const depart = [r.left + (relais.poitrine[0] - VB.x) * k, r.top + (relais.poitrine[1] - VB.y) * k];
+  const P = [depart, [depart[0] + W * 0.08, depart[1] - H * 0.14], [W * 0.78, H * 0.3], [W * 1.08, H * 0.78]];
+  const u = clamp((volP - relais.p0) / (1 - relais.p0), 0, 1), [X, Y] = bez(P, u), [X2, Y2] = bez(P, Math.min(1, u + 0.01));
+  const cible = [(X - r.left) / k + VB.x, (Y - r.top) / k + VB.y];
+  const pente = Math.atan2(Y2 - Y, X2 - X) * 180 / Math.PI;
+  // juste après le relais, l’oiseau part de l’inclinaison de l’oiseau posé (−48° : son axe), puis prend celle de la trajectoire (200 ms)
+  const e = courbes.sortie(relais.t / 0.2), ang = lerp(-48, pente * 0.6, e), s = lerp(KO_POSE, 0.5, u);
+  const [x, y] = placerVol(cible, ang, s);
+  vol.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${s.toFixed(3)}) translate(-114,-80)`);
+  ailesEnvol.st.cible = pente > 15 ? 1 : 0;
+}
+ailesEnvol.st.chaqueImage = (dt) => { if (relais && relais.t < 0.2) { relais.t = Math.min(0.2, relais.t + dt); placerEnVol(); } };
 function envol() {
   if (reduit) return;
-  const seuil = seuilEnvol(), p = Math.min(1, Math.max(0, (scrollY - seuil) / (innerHeight * 0.6)));
-  const parti = scrollY > seuil; pose.style.visibility = parti ? 'hidden' : 'visible'; vol.toggleAttribute('hidden', !parti || p >= 1);
-  tir.envol(parti);
-  if (!parti || p >= 1) return;
-  const r = scene.getBoundingClientRect(), k = r.width / VB.w, W = innerWidth, H = innerHeight;
-  const depart = [r.left + (720 - VB.x) * k, r.top + (289.6 - VB.y) * k];
-  const P = [depart, [depart[0] + W * 0.08, depart[1] - H * 0.14], [W * 0.78, H * 0.3], [W * 1.08, H * 0.78]];
-  const u = p, [X, Y] = bez(P, u), [X2, Y2] = bez(P, Math.min(1, u + 0.01));
-  const x = (X - r.left) / k + VB.x, y = (Y - r.top) / k + VB.y;
-  const ang = Math.atan2(Y2 - Y, X2 - X) * 180 / Math.PI * 0.6, s = 0.72 - 0.22 * u;
-  vol.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${s.toFixed(3)}) translate(-114,-80)`);
-  battement = (battement + 1) % 6; const h = battement < 3; haut.toggleAttribute('hidden', !h); bas.toggleAttribute('hidden', h);
+  const seuil = seuilEnvol();
+  volP = Math.min(1, Math.max(0, (scrollY - seuil) / (innerHeight * 0.6)));
+  const parti = scrollY > seuil;
+  if (parti !== decolle) {
+    decolle = parti; relais = null;
+    tir.envol(parti, (poitrine) => { if (!decolle) return; relais = { poitrine, p0: Math.min(volP, 0.9), t: 0 }; ailesEnvol.st.c = 0; ailesEnvol.st.plane = 0; envol(); });
+  }
+  const enVol = parti && relais && volP < 1;
+  pose.style.visibility = parti && relais ? 'hidden' : 'visible';
+  vol.toggleAttribute('hidden', !enVol);
+  if (!enVol) { ailesEnvol.arreter(); return; }
+  placerEnVol();
+  ailesEnvol.demarrer();
 }
 envol();
 
@@ -344,33 +454,63 @@ const releve = () => fetch('https://api.open-meteo.com/v1/forecast?latitude=48.1
   .catch(() => {});
 releve(); setInterval(releve, 15 * 60 * 1000);
 
-/* Retour au nid : Florian traverse la page et se pose avec sa famille */
+/* Retour au nid : Florian traverse la page, plane ailes levées, se redresse et se pose avec sa famille.
+   Au relais, l’oiseau en vol et l’oiseau du nid se superposent (aile levée, corps penché) : on passe de l’un à l’autre sur une image. */
 const nid = document.getElementById('nid');
 const arrivee = vol.cloneNode(true);
 arrivee.id = 'oiseau-arrivee';
 arrivee.querySelectorAll('clipPath').forEach((c) => { const ancien = c.id; c.id = ancien + '-a'; arrivee.querySelectorAll(`[clip-path="url(#${ancien})"]`).forEach((n) => n.setAttribute('clip-path', `url(#${c.id})`)); });
 arrivee.setAttribute('hidden', '');
 nid.parentNode.insertBefore(arrivee, nid.nextSibling);
-const aHaut = arrivee.querySelector('.ailes-haut'), aBas = arrivee.querySelector('.ailes-bas');
-const Q = [[-160, -70], [260, -120], [540, 96], [628.5, 141]];
-const qpt = (u) => { const a = 1 - u; return [0, 1].map((k) => a * a * a * Q[0][k] + 3 * a * a * u * Q[1][k] + 3 * a * u * u * Q[2][k] + u * u * u * Q[3][k]); };
-const seposer = () => { arrivee.setAttribute('hidden', ''); nid.classList.remove('attend'); nid.classList.add('pose'); };
-function atterrir() {
-  const D = 1900; let t0 = null;
-  arrivee.removeAttribute('hidden');
-  const pas = (now) => {
-    if (t0 === null) t0 = now;
-    const r = Math.min(1, (now - t0) / D), u = 1 - Math.pow(1 - r, 2.2);
-    const [x, y] = qpt(u), [x2, y2] = qpt(Math.min(1, u + 0.01));
-    const fin = Math.max(0, (r - 0.82) / 0.18);
-    const ang = Math.atan2(y2 - y, x2 - x) * 180 / Math.PI * 0.5 * (1 - fin) - 8 * fin;
-    const s = 0.82 - 0.24 * u;
-    arrivee.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${s.toFixed(3)}) translate(-114,-80)`);
-    const h = fin > 0 ? true : Math.floor((now - t0) / 85) % 2 === 0;
-    aHaut.toggleAttribute('hidden', !h); aBas.toggleAttribute('hidden', h);
-    if (r < 1) requestAnimationFrame(pas); else seposer();
+const ailesArrivee = battement(arrivee);
+// l’oiseau du nid, articulé (même repère que la charte, placé à x 576,5 / y 77, échelle 104/140)
+const corpsNid = document.getElementById('corps-nid'), pattesNid = document.getElementById('pattes-nid');
+const aileNid = document.getElementById('aile-pliee-nid'), aileNidDessus = document.getElementById('aile-dessus-nid');
+const NID = { x: 576.5, y: 77, k: 104 / 140 };
+const versFamille = (p) => [NID.x + (p[0] - 40) * NID.k, NID.y + (p[1] - 24) * NID.k];
+function dessinerNid(e) {
+  corpsNid.setAttribute('transform', corpsPose(e).transform);
+  pattesNid.setAttribute('d', pattesPose(e, e.pieds, e.doigts));
+  const d = aile(e.leve); aileNid.setAttribute('d', d); aileNidDessus.setAttribute('d', d);
+  aileNidDessus.setAttribute('opacity', opaciteAileDessus(e.leve).toFixed(3));
+}
+// la pose du nid, t secondes après le relais : chute, contact (écrasement), redressement, repli de l’aile
+const poser = (t) => {
+  const chute = courbes.entree(seg(t, 0, 0.22)), contact = seg(t, 0.22, 0.6), repli = courbes.entreeSortie(seg(t, 0.3, 0.75));
+  return {
+    dy: -16 * (1 - chute) + 4 * bump(contact) * (1 - contact * 0.4),
+    bascule: 18 - 18 * courbes.depassement(seg(t, 0.1, 0.65), 2.2),
+    sx: 1 + 0.04 * bump(contact), sy: 1 - 0.08 * bump(contact),
+    leve: 1 - repli,
+    pieds: POSE.PIEDS.map((q) => [q[0] + 8 * (1 - chute), q[1]]),
+    doigts: [20 * (1 - chute), 20 * (1 - chute)],
   };
-  requestAnimationFrame(pas);
+};
+function atterrir() {
+  const D = 1.9, POSE_FIN = 0.95, S0 = 0.82;
+  // la poitrine de l’oiseau posé au moment du relais : la trajectoire y mène
+  const cible = versFamille(corpsPose(poser(0)).point(POSE.POITRINE));
+  const Q = [[-160, -70], [260, -120], [cible[0] - 88, cible[1] - 45], cible];
+  const qpt = (u) => { const a = 1 - u; return [0, 1].map((k) => a * a * a * Q[0][k] + 3 * a * a * u * Q[1][k] + 3 * a * u * u * Q[2][k] + u * u * u * Q[3][k]); };
+  let t = 0, relaye = false;
+  arrivee.removeAttribute('hidden'); ailesArrivee.st.c = 0; ailesArrivee.st.plane = 0; ailesArrivee.st.tPlane = 0.05; ailesArrivee.demarrer();
+  animer((dt) => {
+    t += dt;
+    if (!relaye) {
+      const r = Math.min(1, t / D), u = 1 - Math.pow(1 - r, 2.2);
+      const q = qpt(u), q2 = qpt(Math.min(1, u + 0.01));
+      const tangente = Math.atan2(q2[1] - q[1], q2[0] - q[0]) * 180 / Math.PI;
+      const ang = lerp(tangente * 0.5, -30, courbes.entreeSortie(seg(r, 0.8, 1))); // il se redresse pour freiner
+      const s = lerp(S0, NID.k, u);
+      ailesArrivee.st.cible = r > 0.7 ? 1 : 0; // plané ailes levées sur la fin
+      const [x, y] = placerVol(q, ang, s);
+      arrivee.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${s.toFixed(3)}) translate(-114,-80)`);
+      if (r >= 1) { relaye = true; t = 0; ailesArrivee.arreter(); arrivee.setAttribute('hidden', ''); nid.classList.remove('attend'); }
+      return;
+    }
+    dessinerNid(poser(t));
+    if (t >= POSE_FIN) { dessinerNid(poser(POSE_FIN + 1)); return false; }
+  });
 }
 if (reduit || !('IntersectionObserver' in window)) nid.classList.remove('attend');
 else new IntersectionObserver(([en], obs) => { if (en.isIntersecting) { obs.disconnect(); setTimeout(atterrir, 150); } }, { threshold: 0.55 }).observe(famille);
