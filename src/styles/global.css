@@ -126,6 +126,16 @@ h1 .deux { color: var(--fe-primary); display: block; }
   color: var(--fe-afficheur-texte); text-align: center;
   transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1.15), border-color .2s, box-shadow .2s;
 }
+/* La tirade d’Allen Iverson, au-dessus du panneau : au survol, ou au toucher (.bulle, posée par tir.js) */
+.tableau { pointer-events: auto; }
+.tableau::after {
+  content: attr(data-bulle); position: absolute; bottom: calc(100% + 8px); right: 0; z-index: 2; width: min(240px, calc(100vw - 32px)); padding: 8px 12px;
+  background: var(--fe-surface); border: 1px solid var(--fe-border); border-radius: 6px;
+  font: 400 12px/1.4 var(--fe-font-code); color: var(--fe-text-muted); text-align: left;
+  opacity: 0; transform: translateY(4px); transition: opacity var(--fe-duration-courte), transform var(--fe-duration-courte) var(--fe-ease-sortie); pointer-events: none;
+}
+@media (hover: hover) { .tableau:hover::after { opacity: 1; transform: none; transition-delay: .4s; } }
+.tableau.bulle::after { opacity: 1; transform: none; }
 .tableau.range { opacity: 0; transform: translate(-50%, -24px); pointer-events: none; }
 .tableau-potence { position: absolute; left: var(--poteau-x, 90.78%); bottom: var(--panneau-bas, 88.55%); width: 3px; height: 8px; transform: translateX(-50%); background: var(--fe-text); transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1.15); }
 .tableau-potence.range { opacity: 0; transform: translate(-50%, -8px) scaleY(0); }
@@ -146,6 +156,11 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .indice-tir.a-gauche { flex-direction: row-reverse; }
 .indice-tir.a-gauche svg { transform: scaleX(-1); }
 .indice-tir.parti { opacity: 0; animation: none; }
+/* Le premier tir : BLOCKED BY ÉTOURNEAU ! surgit au point du contre, puis s’efface */
+.contre { position: absolute; margin: 0; transform: translateX(-50%); font: 800 20px/1 var(--fe-font-titre); letter-spacing: .02em; color: var(--fe-accent); white-space: nowrap; pointer-events: none; opacity: 0; }
+.contre.montre { animation: contre 1.3s var(--fe-ease-sortie) forwards; }
+@keyframes contre { 0% { opacity: 0; transform: translateX(-50%) scale(.6) rotate(-6deg); } 12% { opacity: 1; transform: translateX(-50%) scale(1.12) rotate(-3deg); } 24%, 70% { opacity: 1; transform: translateX(-50%) scale(1) rotate(-3deg); } 100% { opacity: 0; transform: translate(-50%, -12px) rotate(-3deg); } }
+@media (max-width: 600px) { .contre { font-size: 16px; } }
 @keyframes invite { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
 @media (max-width: 600px) {
   .tableau { --w: 112px; padding: 4px 8px 8px; }
@@ -182,6 +197,8 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .etape h3 a:hover { color: var(--fe-primary); }
 .etape h3 .pointe { width: 12px; height: 16px; fill: var(--fe-primary); flex-shrink: 0; }
 .etape-desc { font-size: 20px; line-height: 1.5; color: var(--fe-text-muted); max-width: 40ch; }
+.etape-citation { font-size: 16px; font-style: italic; line-height: 1.5; color: var(--fe-text-muted); max-width: 44ch; }
+.etape-citation cite { font-style: normal; white-space: nowrap; }
 /* puces « pointe » */
 .etape-points { list-style: none; padding: 0; display: grid; gap: 12px; font-size: 16px; color: var(--fe-text); max-width: 52ch; }
 .etape-points li { display: flex; gap: 12px; align-items: baseline; }
@@ -199,7 +216,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
 /* Rythme vertical, pris dans la grille de 4 : 8–12 px dans un groupe · 24 px entre les groupes · 32 px avant « aussi » */
 .etape > * { margin: 0; }
 .etape .etape-type + h3 { margin-top: 8px; }
-.etape h3 + .etape-desc { margin-top: 12px; }
+.etape h3 + .etape-desc, .etape h3 + .etape-citation, .etape .etape-citation + .etape-desc { margin-top: 12px; }
 .etape .etape-points { margin-top: 24px; }
 .etape .etape-points + *, .etape .etape-desc + .etiquettes { margin-top: 24px; }
 .etape .etape-tags + .etape-lien, .etape .etape-tags + .aussi { margin-top: 8px; }
@@ -324,6 +341,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
 
 /* ——— 404 : air ball ——— */
 .perdu { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 48px; align-items: center; min-height: calc(100svh - 68px - 80px); padding-block: 48px; }
+.perdu-recit { margin: 24px 0 0; max-width: 52ch; font-size: 18px; line-height: 1.5; color: var(--fe-text-muted); text-wrap: pretty; }
 .perdu-lien { margin: 24px 0 0; }
 .perdu-lien a { display: inline-flex; align-items: center; gap: 12px; font-weight: 700; text-decoration: none; }
 .perdu-lien .pointe { width: 8px; height: 10px; fill: currentColor; }
@@ -337,6 +355,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
   .tableau, .tableau-potence { transition: none; }
   .copier:active:not(:disabled) { transform: none; }
   .tableau.buzz #t-24, .tableau.point #t-paniers { animation: none; }
+  .tableau::after { transition: none; }
   .etape { transition: none; }
   .copier.copie { animation: none; }
   .copier.copie .coche-trace { animation: none; stroke-dashoffset: 0; }

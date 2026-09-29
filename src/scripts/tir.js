@@ -4,6 +4,7 @@
    passer derrière le corps ; la tête suit le ballon pendant qu’il vole. */
 import { aile, pointsAile, BOUT_AILE, opaciteAileDessus, transformTete, opacitesBec, DUREE_TETE, DUREES, courbes, clamp, lerp, seg, rotP, corpsPose, pattesPose, POSE } from './oiseau.js';
 import { animer } from './horloge.js';
+import { battement } from './vol.js';
 
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -78,8 +79,8 @@ export function initTir({ scene, VB }) {
     const W = svg.clientWidth, k = W / VB.w, [bx, by] = main(0, 1);
     // version courte quand la longue toucherait le cercle du panier (tablette, mobile)
     const libelle = indice.querySelector('span'), cercleG = (988 - VB.x) * k;
-    libelle.textContent = 'à toi de tirer';
-    if ((bx - VB.x) * k + 16 * k + 24 + indice.offsetWidth + 12 > cercleG) libelle.textContent = 'tire !';
+    libelle.textContent = contre.fait ? 'allez, réessaie' : 'à toi de tirer';
+    if ((bx - VB.x) * k + 16 * k + 24 + indice.offsetWidth + 12 > cercleG) libelle.textContent = contre.fait ? 'réessaie !' : 'tire !';
     const w = indice.offsetWidth, h = indice.offsetHeight;
     const droite = (bx - VB.x) * k + 16 * k + 24, gauche = (690 - VB.x) * k - 24 - w;
     const aDroite = droite + w + 16 <= W;
@@ -87,6 +88,39 @@ export function initTir({ scene, VB }) {
     indice.style.left = Math.round(aDroite ? droite : Math.max(16, gauche)) + 'px';
     indice.style.top = Math.round((by - VB.y) * k - h / 2) + 'px';
   };
+  /* Le premier tir ne rentre jamais : un étourneau surgit du côté du panier et le contre. Ensuite, « allez, réessaie ».
+     L’oiseau fonce sur le point où sera le ballon après contre.duree secondes (chute libre : il n’a rien touché avant). */
+  const contre = { fait: reduit, actif: false, relance: false, t: 0, duree: 0.25, x: 0, y: 0 };
+  const texteContre = document.getElementById('contre');
+  const contreur = document.getElementById('oiseau-vol').cloneNode(true);
+  contreur.id = 'contreur';
+  contreur.querySelectorAll('clipPath').forEach((c) => { const ancien = c.id; c.id = ancien + '-c'; contreur.querySelectorAll(`[clip-path="url(#${ancien})"]`).forEach((n) => n.setAttribute('clip-path', `url(#${c.id})`)); });
+  svg.appendChild(contreur);
+  const ailesContreur = battement(contreur);
+  const DEPART_C = 1300, SORTIE_C = -150;
+  // de droite à gauche, en piqué : au plus bas au moment du contre, la tête juste au-dessus du ballon
+  function placerContreur(t) {
+    const v = (DEPART_C - contre.x) / contre.duree, bx = DEPART_C - v * t, by = contre.y - 14 - 0.0004 * (bx - contre.x) ** 2;
+    contreur.setAttribute('transform', `translate(${bx.toFixed(1)} ${by.toFixed(1)}) scale(-0.55 0.55) translate(-160 -90)`);
+    return bx > SORTIE_C;
+  }
+  function lancerContre() {
+    const T = contre.duree;
+    contre.fait = true; contre.actif = true; contre.t = 0;
+    contre.x = x + vx * T; contre.y = y + vy * T + 0.5 * G * T * T;
+    placerContreur(0); contreur.removeAttribute('hidden'); ailesContreur.demarrer();
+    let t = 0;
+    // tant que le contre n’a pas eu lieu, l’oiseau suit l’horloge du ballon : ils se rejoignent à la même image
+    animer((dt) => { t = contre.actif ? contre.t : t + dt; if (placerContreur(t)) return; contreur.setAttribute('hidden', ''); ailesContreur.arreter(); return false; });
+  }
+  // au contact : le ballon repart vers l’arrière et vers le bas, le texte surgit à l’endroit du contre
+  function contrer() {
+    contre.actif = false; vx = -260; vy = 160;
+    const k = svg.clientWidth / VB.w;
+    texteContre.style.left = Math.round(clamp((x - VB.x) * k, 120, svg.clientWidth - 120)) + 'px';
+    texteContre.style.top = Math.round((y - VB.y) * k - 40) + 'px';
+    texteContre.classList.remove('montre'); void texteContre.offsetWidth; texteContre.classList.add('montre');
+  }
   placerIndice(); addEventListener('resize', placerIndice);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(placerIndice);
   // les gestes de l’aile : un nouveau geste interrompt le précédent
@@ -100,6 +134,9 @@ export function initTir({ scene, VB }) {
   /* Le tableau Bodet n’apparaît qu’à la première prise de ballon : il descend de ses câbles */
   const potence = document.querySelector('.tableau-potence');
   tableau.classList.add('range'); potence.classList.add('range');
+  // au toucher, la tirade d’Iverson s’ouvre et se referme (au survol, le CSS suffit) ; un toucher ailleurs la ferme
+  tableau.addEventListener('click', () => tableau.classList.toggle('bulle'));
+  document.addEventListener('pointerdown', (e) => { if (!tableau.contains(e.target)) tableau.classList.remove('bulle'); });
   const montrerTableau = () => { tableau.classList.remove('range'); potence.classList.remove('range'); };
   /* Les 24 secondes : elles partent quand on prend le ballon */
   let reste = 24, depart = 0, tourne = false, horloge = 0;
@@ -125,7 +162,11 @@ export function initTir({ scene, VB }) {
       bascule = -3 * courbes.douce(b);
       dessinerOiseau(); tenir();
       if (b > 0.3) ballon.style.opacity = 1; // le ballon apparaît quand l’aile passe devant le ventre
-    }, () => { etat = 'main'; });
+    }, () => {
+      etat = 'main';
+      // après le contre, l’indice revient une fois : « allez, réessaie »
+      if (contre.fait && !contre.relance && indice.classList.contains('parti')) { contre.relance = true; indice.classList.remove('parti'); placerIndice(); }
+    });
   }
   // replier l’aile (--fe-duration-moyenne), sans à-coup
   function replier() {
@@ -144,6 +185,7 @@ export function initTir({ scene, VB }) {
   function lacher(v0x, v0y) {
     etat = 'vol'; vx = v0x; vy = v0y; compte = false; tirs++; majTableau(false);
     indice.classList.add('parti'); points = [[x, y]];
+    if (!contre.fait) lancerContre();
     anim(140, (u) => orienter(-12 + 42 * u), () => anim(300, (u) => orienter(30 * (1 - u)), replier));
     physique();
   }
@@ -164,6 +206,7 @@ export function initTir({ scene, VB }) {
   const CERCLE = [[988.2, 159.5], [1071.8, 159.5]];
   function avancer(dt) {
     const py = y;
+    if (contre.actif && (contre.t += dt) >= contre.duree) contrer();
     vy += G * dt; x += vx * dt; y += vy * dt; rot += vx * dt * 2.2;
     for (const [cx, cy] of CERCLE) {
       const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy);

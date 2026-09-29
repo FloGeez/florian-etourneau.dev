@@ -9,7 +9,8 @@ const annee = new Date().getFullYear();
     <div class="perdu-texte">
       <p class="surtitre">404 · page introuvable</p>
       <h1>Air ball. <span class="deux">Cette page n’existe pas.</span></h1>
-      <p class="perdu-lien"><a href="/">Retour au terrain<svg class="pointe" viewBox="0 0 8 10" aria-hidden="true"><path d="M0 0 L8 5 L0 10 Z"/></svg></a></p>
+      <p class="perdu-recit">En 1997, lors de sa saison rookie, Kobe Bryant a enchaîné quatre air balls décisifs en playoffs. Au lieu de sombrer, il a passé l’été à la salle jusqu’à l’aube pour devenir une légende. Cette page a fait un air ball (ou elle n’existe plus), mais l’important, c’est de se relever pour prendre le prochain tir.</p>
+      <p class="perdu-lien"><a href="/">Revenir sur le terrain<svg class="pointe" viewBox="0 0 8 10" aria-hidden="true"><path d="M0 0 L8 5 L0 10 Z"/></svg></a></p>
     </div>
     <!-- Sur le cercle : l’oiseau perché sur l’arceau ; le tir, trop long, passe au-dessus de tout (air-ball.js). -->
     <svg class="perdu-scene" viewBox="20 -10 250 262" role="img" aria-label="L’étourneau perché sur le cercle du panier ; le ballon passe au-dessus de tout sans rien toucher : un air ball.">
@@ -34,6 +35,7 @@ const annee = new Date().getFullYear();
   <script>
     import { initTheme } from '../scripts/theme.js';
     import { airBall } from '../scripts/air-ball.js';
+    import '../scripts/sous-le-capot.js';
     initTheme();
     airBall(document.getElementById('ab-ballon'));
   </script>

@@ -47,13 +47,14 @@ src/
     formes.js              les formes que dessine la nuée et leur échantillonnage
     oiseau.js              l’oiseau articulé (copie de la charte)
     scene-accueil.js       cadrage de la scène du tir et seuil d’envol
-    tir.js                 le mini-jeu du tir
+    tir.js                 le mini-jeu du tir (et le contre du premier tir)
     envol.js, vol.js       l’envol de Florian, le battement d’ailes
     famille.js             le retour au nid, le dribble
     rennes.js              l’heure et la météo
     copier.js, entete.js   copier l’adresse, l’en-tête au défilement
     theme.js               la bascule de thème
     air-ball.js            l’animation de la page 404
+    sous-le-capot.js       le mot laissé dans la console
     contact.js             envoi du formulaire sans rechargement
   styles/
     tokens.css             copie des tokens de la charte — ne pas modifier ici

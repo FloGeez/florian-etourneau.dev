@@ -9,6 +9,7 @@ import { initRennes } from './rennes.js';
 import { initFamille } from './famille.js';
 import { initCopier } from './copier.js';
 import { initContact } from './contact.js';
+import './sous-le-capot.js';         // un mot pour qui ouvre les DevTools
 
 const accueil = initSceneAccueil();      // le fil, l’oiseau et le panier
 const nuee = initNuee(accueil);           // où se pose la nuée, section par section
