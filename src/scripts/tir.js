@@ -133,7 +133,7 @@ export function initTir({ scene, VB }) {
 
   /* Le tableau Bodet n’apparaît qu’à la première prise de ballon : il descend de ses câbles */
   const potence = document.querySelector('.tableau-potence');
-  tableau.classList.add('range'); potence.classList.add('range');
+  // rangé dès le HTML (.range) : pas d’apparition furtive avant le chargement du script
   // au toucher, la tirade d’Iverson s’ouvre et se referme (au survol, le CSS suffit) ; un toucher ailleurs la ferme
   tableau.addEventListener('click', () => tableau.classList.toggle('bulle'));
   document.addEventListener('pointerdown', (e) => { if (!tableau.contains(e.target)) tableau.classList.remove('bulle'); });
