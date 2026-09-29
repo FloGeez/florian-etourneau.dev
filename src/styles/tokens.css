@@ -162,17 +162,71 @@
   --fe-pattes: #3A2F45;
   --fe-oiseaux: #5B2A9E;
   --fe-oiseaux-2: #2A1245;
+  --fe-clair-bg: #FBF6EF;
+  --fe-clair-surface: #FFFFFF;
+  --fe-clair-surface-2: #F1ECE5;
+  --fe-clair-border: #DFDAD3;
+  --fe-clair-text: #1C1426;
+  --fe-clair-text-muted: #59544F;
+  --fe-clair-primary: #5B2A9E;
+  --fe-clair-primary-hover: #492080;
+  --fe-clair-on-primary: #FFFFFF;
+  --fe-clair-primary-soft: #EFE9FE;
+  --fe-clair-accent: #B34A0B;
+  --fe-clair-link: #5B2A9E;
+  --fe-clair-focus: #AE92EA;
+  --fe-clair-info: #00636A;
+  --fe-clair-info-soft: #E4FCFE;
+  --fe-clair-success: #0D6639;
+  --fe-clair-warning: #804500;
+  --fe-clair-danger: #C0392B;
+  --fe-clair-danger-soft: #FEF4F2;
+  --fe-clair-logo-corps: #5B2A9E;
+  --fe-clair-logo-aile: #2A1245;
+  --fe-clair-logo-aile-loin: #3E1C69;
+  --fe-clair-logo-ventre: #F7F4EF;
+  --fe-clair-logo-bec: #1C1426;
+  --fe-clair-pattes: #3A2F45;
+  --fe-clair-oiseaux: #5B2A9E;
+  --fe-clair-oiseaux-2: #2A1245;
+  --fe-sombre-bg: #0D0912;
+  --fe-sombre-surface: #16111B;
+  --fe-sombre-surface-2: #211C26;
+  --fe-sombre-border: #312C37;
+  --fe-sombre-text: #F2EEF7;
+  --fe-sombre-text-muted: #B5AFBE;
+  --fe-sombre-primary: #C8B3FA;
+  --fe-sombre-primary-hover: #DFD3FF;
+  --fe-sombre-on-primary: #1D023D;
+  --fe-sombre-primary-soft: #2E1D4A;
+  --fe-sombre-accent: #DC8F6C;
+  --fe-sombre-link: #C8B3FA;
+  --fe-sombre-focus: #AE92EA;
+  --fe-sombre-info: #9CCBCF;
+  --fe-sombre-info-soft: #10292C;
+  --fe-sombre-success: #A3CDB0;
+  --fe-sombre-warning: #DFBA8F;
+  --fe-sombre-danger: #FBA99B;
+  --fe-sombre-danger-soft: #3A1714;
+  --fe-sombre-logo-corps: #AE92EA;
+  --fe-sombre-logo-aile: #5B2A9E;
+  --fe-sombre-logo-aile-loin: #7C54BC;
+  --fe-sombre-logo-ventre: #F7F4EF;
+  --fe-sombre-logo-bec: #F7F4EF;
+  --fe-sombre-pattes: #B9ABC9;
+  --fe-sombre-oiseaux: #C8B3FA;
+  --fe-sombre-oiseaux-2: #9571DA;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --fe-bg: #120F15;
-    --fe-surface: #1B181E;
-    --fe-surface-2: #262329;
-    --fe-border: #36333A;
-    --fe-text: #F3EEF7;
-    --fe-text-muted: #B4B0B8;
+    --fe-bg: #0D0912;
+    --fe-surface: #16111B;
+    --fe-surface-2: #211C26;
+    --fe-border: #312C37;
+    --fe-text: #F2EEF7;
+    --fe-text-muted: #B5AFBE;
     --fe-primary: #C8B3FA;
     --fe-primary-hover: #DFD3FF;
     --fe-on-primary: #1D023D;
@@ -199,12 +253,75 @@
 }
 
 :root[data-theme="dark"] {
-  --fe-bg: #120F15;
-  --fe-surface: #1B181E;
-  --fe-surface-2: #262329;
-  --fe-border: #36333A;
-  --fe-text: #F3EEF7;
-  --fe-text-muted: #B4B0B8;
+  --fe-bg: #0D0912;
+  --fe-surface: #16111B;
+  --fe-surface-2: #211C26;
+  --fe-border: #312C37;
+  --fe-text: #F2EEF7;
+  --fe-text-muted: #B5AFBE;
+  --fe-primary: #C8B3FA;
+  --fe-primary-hover: #DFD3FF;
+  --fe-on-primary: #1D023D;
+  --fe-primary-soft: #2E1D4A;
+  --fe-accent: #DC8F6C;
+  --fe-link: #C8B3FA;
+  --fe-focus: #AE92EA;
+  --fe-info: #9CCBCF;
+  --fe-info-soft: #10292C;
+  --fe-success: #A3CDB0;
+  --fe-warning: #DFBA8F;
+  --fe-danger: #FBA99B;
+  --fe-danger-soft: #3A1714;
+  --fe-logo-corps: #AE92EA;
+  --fe-logo-aile: #5B2A9E;
+  --fe-logo-aile-loin: #7C54BC;
+  --fe-logo-ventre: #F7F4EF;
+  --fe-logo-bec: #F7F4EF;
+  --fe-pattes: #B9ABC9;
+  --fe-oiseaux: #C8B3FA;
+  --fe-oiseaux-2: #9571DA;
+  color-scheme: dark;
+}
+
+/* Un thème imposé à un bloc, quel que soit celui de la page */
+.fe-clair {
+  --fe-bg: #FBF6EF;
+  --fe-surface: #FFFFFF;
+  --fe-surface-2: #F1ECE5;
+  --fe-border: #DFDAD3;
+  --fe-text: #1C1426;
+  --fe-text-muted: #59544F;
+  --fe-primary: #5B2A9E;
+  --fe-primary-hover: #492080;
+  --fe-on-primary: #FFFFFF;
+  --fe-primary-soft: #EFE9FE;
+  --fe-accent: #B34A0B;
+  --fe-link: #5B2A9E;
+  --fe-focus: #AE92EA;
+  --fe-info: #00636A;
+  --fe-info-soft: #E4FCFE;
+  --fe-success: #0D6639;
+  --fe-warning: #804500;
+  --fe-danger: #C0392B;
+  --fe-danger-soft: #FEF4F2;
+  --fe-logo-corps: #5B2A9E;
+  --fe-logo-aile: #2A1245;
+  --fe-logo-aile-loin: #3E1C69;
+  --fe-logo-ventre: #F7F4EF;
+  --fe-logo-bec: #1C1426;
+  --fe-pattes: #3A2F45;
+  --fe-oiseaux: #5B2A9E;
+  --fe-oiseaux-2: #2A1245;
+  color-scheme: light;
+}
+
+.fe-sombre {
+  --fe-bg: #0D0912;
+  --fe-surface: #16111B;
+  --fe-surface-2: #211C26;
+  --fe-border: #312C37;
+  --fe-text: #F2EEF7;
+  --fe-text-muted: #B5AFBE;
   --fe-primary: #C8B3FA;
   --fe-primary-hover: #DFD3FF;
   --fe-on-primary: #1D023D;

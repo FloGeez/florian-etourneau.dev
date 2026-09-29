@@ -1,6 +1,7 @@
 ---
 import "../styles/tokens.css";
 import "../styles/global.css";
+import tokens from "../styles/tokens.css?raw";
 
 interface Props {
   title?: string;
@@ -13,6 +14,14 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// La barre du navigateur suit les tokens : la couleur de marque en clair, le fond en sombre
+const token = (nom: string) => {
+  const valeur = tokens.match(new RegExp(`--fe-${nom}:\\s*([^;]+);`))?.[1];
+  if (!valeur) throw new Error(`Token --fe-${nom} introuvable dans tokens.css`);
+  return valeur.trim();
+};
+const barreClair = token("clair-primary"), barreSombre = token("sombre-bg");
 ---
 
 <!doctype html>
@@ -47,12 +56,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="manifest" href="/favicon/site.webmanifest" />
     <meta
       name="theme-color"
-      content="#5B2A9E"
+      content={barreClair}
       media="(prefers-color-scheme: light)"
     />
     <meta
       name="theme-color"
-      content="#120F15"
+      content={barreSombre}
       media="(prefers-color-scheme: dark)"
     />
 
