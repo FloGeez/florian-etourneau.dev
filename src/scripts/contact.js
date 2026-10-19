@@ -6,7 +6,7 @@
 import { actions, isInputError } from 'astro:actions';
 import { solveChallenge } from 'altcha-lib';
 import { deriveKey } from 'altcha-lib/algorithms/web/pbkdf2';
-import { ailesVol, bobVol } from './oiseau.js';
+import { flightWings, flightBob } from '@etourneau/murmuration/oiseau';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ECHEC = 'L’envoi a échoué. Réessaie, ou écris-moi directement à l’adresse ci-dessus.';
@@ -60,7 +60,7 @@ function envolEnveloppe({ pied, formulaire, scene, fin }) {
   scene.setAttribute('width', W); scene.setAttribute('height', H); scene.setAttribute('viewBox', `0 0 ${W} ${H}`);
   const feuille = scene.querySelector('#envoi-feuille'), rabat = scene.querySelector('#envoi-rabat'), lettre = scene.querySelector('#envoi-lettre');
   const oiseau = scene.querySelector('#envoi-oiseau'), trace = scene.querySelector('#envoi-trace');
-  const pres = oiseau.querySelector('.vol-pres'), loin = oiseau.querySelector('.vol-loin'), dedans = oiseau.querySelector('.vol-dedans');
+  const pres = oiseau.querySelector('.wing-near'), loin = oiseau.querySelector('.wing-far'), dedans = oiseau.querySelector('.flight-inner');
   let battu = 0, tPrec = 0; // position dans le cycle de battement, pilotée par le temps
 
   // La feuille part du formulaire et se plie en enveloppe, au centre du formulaire.
@@ -122,8 +122,8 @@ function envolEnveloppe({ pied, formulaire, scene, fin }) {
     oiseau.setAttribute('transform', `translate(${pos[0].toFixed(1)},${pos[1].toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${s}) translate(-114,-80)`);
     // battement continu : 5,5 par seconde à l’approche, 7 avec l’enveloppe
     battu += (t - tPrec) / 1000 * (t > T.prise ? 7 : 5.5); tPrec = t;
-    const ailes = ailesVol(battu); pres.setAttribute('d', ailes.pres); loin.setAttribute('d', ailes.loin);
-    dedans.setAttribute('transform', `translate(0 ${bobVol(battu, 0, 0.8).toFixed(2)})`); // à 7 battements/s, un grand mouvement du corps vibrerait
+    const ailes = flightWings(battu); pres.setAttribute('d', ailes.near); loin.setAttribute('d', ailes.far);
+    dedans.setAttribute('transform', `translate(0 ${flightBob(battu, 0, 0.8).toFixed(2)})`); // à 7 battements/s, un grand mouvement du corps vibrerait
     lettre.setAttribute('transform', `translate(${cx.toFixed(1)},${cy.toFixed(1)}) rotate(${rot.toFixed(1)}) scale(${rebond.toFixed(3)})`);
 
     // 3. La confirmation prend la place du formulaire pendant que l’oiseau s’éloigne.

@@ -1,10 +1,9 @@
 /* Le tir : à toi de jouer. L’aile lève le ballon ; on tire vers l’arrière, on vise, on lâche.
    Le tableau d’affichage compte les paniers, les tirs et les 24 secondes.
-   L’oiseau est articulé (src/scripts/oiseau.js) : la même aile passe de pliée à levée par l’avant, sans jamais
+   L’oiseau est articulé (@etourneau/murmuration/oiseau) : la même aile passe de pliée à levée par l’avant, sans jamais
    passer derrière le corps ; la tête suit le ballon pendant qu’il vole. */
-import { aile, pointsAile, BOUT_AILE, opaciteAileDessus, transformTete, opacitesBec, DUREE_TETE, DUREES, courbes, clamp, lerp, seg, rotP, corpsPose, pattesPose, POSE } from './oiseau.js';
-import { animer } from './horloge.js';
-import { battement } from './vol.js';
+import { wing, wingPoints, WING_TIP, wingOverlayOpacity, headTransform, beakOpacities, HEAD_DURATION, DURATIONS, easings, clamp, lerp, progress, rotatePoint, perchedBody, perchedLegs, PERCHED } from '@etourneau/murmuration/oiseau';
+import { animate, createFlap } from '@etourneau/murmuration/flight';
 
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -17,14 +16,14 @@ export function initTir({ scene, VB }) {
   const trace = document.getElementById('trajectoire'), indice = document.getElementById('indice-tir');
   const visee = document.getElementById('visee'), vDir = document.getElementById('visee-dir'), vForce = document.getElementById('visee-force');
   const tableau = document.getElementById('tableau'), tPaniers = document.getElementById('t-paniers'), tTirs = document.getElementById('t-tirs'), t24 = document.getElementById('t-24');
-  const G = 930, R = 16, EP = POSE.EPAULE, VMAX = 820;
+  const G = 930, R = 16, EP = PERCHED.SHOULDER, VMAX = 820;
   const OX = 660.6, OY = 190.8, KO = 130 / 140;
   const versScene = (lx, ly) => [OX + (lx - 40) * KO, OY + (ly - 24) * KO];
   // leve : 0 aile pliée → 1 aile levée ; angle : rotation en plus, autour de l’épaule, une fois l’aile levée (visée, tir)
-  let leve = 1, bascule = 0, hauteur = 0, corps = corpsPose();
+  let leve = 1, bascule = 0, hauteur = 0, corps = perchedBody();
   // la main : le bout de l’aile, prolongé de 20 unités ; à leve = 1 et angle = 0, c’est l’ancien point (130, −12) + 20
   const main = (ang, t = leve) => {
-    const b = rotP(pointsAile(t)[BOUT_AILE], ang, EP), dx = b[0] - EP[0], dy = b[1] - EP[1], n = Math.hypot(dx, dy);
+    const b = rotatePoint(wingPoints(t)[WING_TIP], ang, EP), dx = b[0] - EP[0], dy = b[1] - EP[1], n = Math.hypot(dx, dy);
     const q = corps.point([b[0] + dx / n * 20, b[1] + dy / n * 20]);
     return versScene(q[0], q[1]);
   };
@@ -33,27 +32,27 @@ export function initTir({ scene, VB }) {
   const placer = () => ballon.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)})`);
   let angle = 0;
   function dessinerOiseau() {
-    corps = corpsPose({ bascule, dy: hauteur });
+    corps = perchedBody({ tilt: bascule, dy: hauteur });
     corpsEl.setAttribute('transform', corps.transform);
-    pattesEl.setAttribute('d', pattesPose({ bascule, dy: hauteur }));
-    const d = aile(leve), r = `rotate(${angle.toFixed(1)} ${EP[0]} ${EP[1]})`;
+    pattesEl.setAttribute('d', perchedLegs({ tilt: bascule, dy: hauteur }));
+    const d = wing(leve), r = `rotate(${angle.toFixed(1)} ${EP[0]} ${EP[1]})`;
     ailePliee.setAttribute('d', d); ailePliee.setAttribute('transform', r);
     aileDessus.setAttribute('d', d); aileDessus.setAttribute('transform', r);
-    aileDessus.style.opacity = opaciteAileDessus(leve).toFixed(3);
+    aileDessus.style.opacity = wingOverlayOpacity(leve).toFixed(3);
   }
   const tenir = () => { [x, y] = main(angle); placer(); };
   const orienter = (a) => { angle = a; dessinerOiseau(); };
 
   /* La tête : un coup sec pour se retourner, puis elle tient ; l’inclinaison suit le ballon en douceur */
   const tete = { sens: 1, depuis: 1, cible: 1, t: 1, penche: 0, ciblePenche: 0, actif: false };
-  const TETE = versScene(119, 58), POITRINE_X = versScene(...POSE.POITRINE)[0];
+  const TETE = versScene(119, 58), POITRINE_X = versScene(...PERCHED.CHEST)[0];
   function dessinerTete() {
-    const tr = transformTete(tete.sens, tete.penche); teteEl.setAttribute('transform', tr); crane.setAttribute('transform', tr);
-    const o = opacitesBec(tete.sens); becProfil.style.opacity = o.profil.toFixed(3); becFace.style.opacity = o.face.toFixed(3);
+    const tr = headTransform(tete.sens, tete.penche); teteEl.setAttribute('transform', tr); crane.setAttribute('transform', tr);
+    const o = beakOpacities(tete.sens); becProfil.style.opacity = o.profile.toFixed(3); becFace.style.opacity = o.front.toFixed(3);
   }
   function majTete(dt) {
-    tete.t = Math.min(1, tete.t + dt / DUREE_TETE);
-    tete.sens = lerp(tete.depuis, tete.cible, courbes.entreeSortie(tete.t));
+    tete.t = Math.min(1, tete.t + dt / HEAD_DURATION);
+    tete.sens = lerp(tete.depuis, tete.cible, easings.inOut(tete.t));
     tete.penche += (tete.ciblePenche - tete.penche) * (1 - Math.exp(-dt / 0.08));
     const fini = tete.t >= 1 && Math.abs(tete.ciblePenche - tete.penche) < 0.05;
     if (fini) tete.penche = tete.ciblePenche;
@@ -64,7 +63,7 @@ export function initTir({ scene, VB }) {
     if (sens !== tete.cible) { tete.depuis = tete.sens; tete.cible = sens; tete.t = 0; }
     tete.ciblePenche = penche;
     if (reduit) { tete.sens = sens; tete.t = 1; tete.penche = penche; dessinerTete(); return; }
-    if (!tete.actif) { tete.actif = true; animer(majTete); }
+    if (!tete.actif) { tete.actif = true; animate(majTete); }
   }
   // le ballon derrière l’oiseau : il se retourne ; devant : il le suit du bec
   function suivreBallon() {
@@ -96,7 +95,7 @@ export function initTir({ scene, VB }) {
   contreur.id = 'contreur';
   contreur.querySelectorAll('clipPath').forEach((c) => { const ancien = c.id; c.id = ancien + '-c'; contreur.querySelectorAll(`[clip-path="url(#${ancien})"]`).forEach((n) => n.setAttribute('clip-path', `url(#${c.id})`)); });
   svg.appendChild(contreur);
-  const ailesContreur = battement(contreur);
+  const ailesContreur = createFlap(contreur);
   const DEPART_C = 1300, SORTIE_C = -150;
   // de droite à gauche, en piqué : au plus bas au moment du contre, la tête juste au-dessus du ballon
   function placerContreur(t) {
@@ -108,10 +107,10 @@ export function initTir({ scene, VB }) {
     const T = contre.duree;
     contre.fait = true; contre.actif = true; contre.t = 0;
     contre.x = x + vx * T; contre.y = y + vy * T + 0.5 * G * T * T;
-    placerContreur(0); contreur.removeAttribute('hidden'); ailesContreur.demarrer();
+    placerContreur(0); contreur.removeAttribute('hidden'); ailesContreur.start();
     let t = 0;
     // tant que le contre n’a pas eu lieu, l’oiseau suit l’horloge du ballon : ils se rejoignent à la même image
-    animer((dt) => { t = contre.actif ? contre.t : t + dt; if (placerContreur(t)) return; contreur.setAttribute('hidden', ''); ailesContreur.arreter(); return false; });
+    animate((dt) => { t = contre.actif ? contre.t : t + dt; if (placerContreur(t)) return; contreur.setAttribute('hidden', ''); ailesContreur.stop(); return false; });
   }
   // au contact : le ballon repart vers l’arrière et vers le bas, le texte surgit à l’endroit du contre
   function contrer() {
@@ -127,7 +126,7 @@ export function initTir({ scene, VB }) {
   let geste = 0;
   const anim = (duree, f, fin) => {
     const id = ++geste; let e = 0;
-    animer((dt) => { if (id !== geste) return false; e += dt * 1000; const u = Math.min(1, e / duree); f(u); if (u >= 1) { if (fin) fin(); return false; } });
+    animate((dt) => { if (id !== geste) return false; e += dt * 1000; const u = Math.min(1, e / duree); f(u); if (u >= 1) { if (fin) fin(); return false; } });
   };
   const deux = (n) => String(Math.min(99, n)).padStart(2, '0');
 
@@ -150,16 +149,16 @@ export function initTir({ scene, VB }) {
   }
   const majTableau = (flash) => { tPaniers.textContent = deux(paniers); tTirs.textContent = deux(tirs); if (flash) { tableau.classList.remove('point'); void tableau.offsetWidth; tableau.classList.add('point'); } };
 
-  // lever l’aile (--fe-duration-longue) : 100 ms d’anticipation, puis 550 ms avec un léger dépassement ; le corps recule de 3°
+  // lever l’aile (--fe-duration-long) : 100 ms d’anticipation, puis 550 ms avec un léger dépassement ; le corps recule de 3°
   function soulever() {
     etat = 'leve'; rot = 0; points = []; trace.setAttribute('d', ''); angle = 0;
     regarder(1, 0);
     if (reduit) { leve = 1; bascule = 0; dessinerOiseau(); tenir(); ballon.style.opacity = 1; etat = 'main'; return; }
     ballon.style.opacity = 0;
-    anim(DUREES.longue * 1000, (u) => {
-      const a = seg(u, 0, 0.15), b = seg(u, 0.15, 1);
-      leve = u < 0.15 ? -0.05 * courbes.entree(a) : -0.05 + 1.05 * courbes.depassement(b, 1.3);
-      bascule = -3 * courbes.douce(b);
+    anim(DURATIONS.long * 1000, (u) => {
+      const a = progress(u, 0, 0.15), b = progress(u, 0.15, 1);
+      leve = u < 0.15 ? -0.05 * easings.in(a) : -0.05 + 1.05 * easings.overshoot(b, 1.3);
+      bascule = -3 * easings.smooth(b);
       dessinerOiseau(); tenir();
       if (b > 0.3) ballon.style.opacity = 1; // le ballon apparaît quand l’aile passe devant le ventre
     }, () => {
@@ -168,11 +167,11 @@ export function initTir({ scene, VB }) {
       if (contre.fait && !contre.relance && indice.classList.contains('parti')) { contre.relance = true; indice.classList.remove('parti'); placerIndice(); }
     });
   }
-  // replier l’aile (--fe-duration-moyenne), sans à-coup
+  // replier l’aile (--fe-duration-medium), sans à-coup
   function replier() {
     const l0 = leve, b0 = bascule, a0 = angle;
     if (reduit) { leve = 0; bascule = 0; angle = 0; dessinerOiseau(); return; }
-    anim(DUREES.moyenne * 1000, (u) => { const k = courbes.entreeSortie(u); leve = l0 * (1 - k); bascule = b0 * (1 - k); angle = a0 * (1 - k); dessinerOiseau(); });
+    anim(DURATIONS.medium * 1000, (u) => { const k = easings.inOut(u); leve = l0 * (1 - k); bascule = b0 * (1 - k); angle = a0 * (1 - k); dessinerOiseau(); });
   }
   function revenir(delai) {
     setTimeout(() => {
@@ -192,7 +191,7 @@ export function initTir({ scene, VB }) {
   let vols = 0;
   function physique() {
     const id = ++vols;
-    animer((dtBrut) => {
+    animate((dtBrut) => {
       if (id !== vols) return false;
       const dt = Math.min(0.033, dtBrut);
       for (let i = 0; i < 3 && etat !== 'repos'; i++) avancer(dt / 3);
@@ -232,7 +231,7 @@ export function initTir({ scene, VB }) {
     const p = (d) => `${(x + ux * d).toFixed(1)} ${(y + uy * d).toFixed(1)}`;
     vDir.setAttribute('d', `M${p(a)} L${p(a + L)}`);
     vForce.setAttribute('d', `M${p(a)} L${p(a + L * f)}`);
-    vForce.style.stroke = `color-mix(in oklab, var(--fe-primary) ${Math.round(100 - f * 70)}%, var(--fe-terre-500))`;
+    vForce.style.stroke = `color-mix(in oklab, var(--fe-primary) ${Math.round(100 - f * 70)}%, var(--fe-terracotta-500))`;
   }
   function debut(e) {
     if (etat !== 'main' || parti) return;
@@ -274,7 +273,7 @@ export function initTir({ scene, VB }) {
       if (parti) {
         if (etat === 'main' || etat === 'leve') { prise = null; visee.setAttribute('hidden', ''); svg.classList.remove('vise'); lacherAuSol(); }
         geste++; hauteur = 0; bascule = 0; angle = 0; dessinerOiseau();
-        surRelais(versScene(...corps.point(POSE.POITRINE)));
+        surRelais(versScene(...corps.point(PERCHED.CHEST)));
       } else {
         // retour sur le fil : l’oiseau reprend sa pose ; s’il n’a plus le ballon, il le reprend
         geste++; hauteur = 0; bascule = 0; angle = 0; leve = etat === 'main' || etat === 'leve' ? 1 : 0; dessinerOiseau();

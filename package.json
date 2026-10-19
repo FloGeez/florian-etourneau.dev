@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.11",
+    "@etourneau/murmuration": "file:../etourneau/packages/murmuration",
+    "@etourneau/tokens": "file:../etourneau/packages/tokens",
     "altcha-lib": "^2.5.0",
     "astro": "^7.3.0"
   },

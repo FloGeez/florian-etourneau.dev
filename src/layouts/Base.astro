@@ -1,7 +1,7 @@
 ---
-import "../styles/tokens.css";
+import "@etourneau/tokens/tokens.css";
 import "../styles/global.css";
-import tokens from "../styles/tokens.css?raw";
+import tokens from "@etourneau/tokens/tokens.css?raw";
 
 interface Props {
   title?: string;
@@ -21,7 +21,7 @@ const token = (nom: string) => {
   if (!valeur) throw new Error(`Token --fe-${nom} introuvable dans tokens.css`);
   return valeur.trim();
 };
-const barreClair = token("clair-primary"), barreSombre = token("sombre-bg");
+const barreClair = token("light-primary"), barreSombre = token("dark-bg");
 ---
 
 <!doctype html>

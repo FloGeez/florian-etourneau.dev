@@ -1,7 +1,7 @@
 /* L’envol de Florian, avec la nuée. Le vol suit le sens de lecture : l’oiseau décolle, puis plonge vers la suite de la page
    (en bas à droite de l’écran). Le trajet est défini à l’écran, puis ramené dans les coordonnées de la scène. */
-import { courbes, clamp, lerp, placerVol } from './oiseau.js';
-import { battement } from './vol.js';
+import { easings, clamp, lerp, placeFlying } from '@etourneau/murmuration/oiseau';
+import { createFlap } from '@etourneau/murmuration/flight';
 
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const bez = (P, u) => { const a = 1 - u; return [0, 1].map((k) => a * a * a * P[0][k] + 3 * a * a * u * P[1][k] + 3 * a * u * u * P[2][k] + u * u * u * P[3][k]); };
@@ -9,7 +9,8 @@ const bez = (P, u) => { const a = 1 - u; return [0, 1].map((k) => a * a * a * P[
 // Renvoie envol() : à appeler au défilement
 export function initEnvol({ scene, VB, seuilEnvol, tir }) {
   const pose = document.getElementById('oiseau-pose'), vol = document.getElementById('oiseau-vol');
-  const ailesEnvol = battement(vol);
+  // pendant les 200 ms qui suivent le relais, l’oiseau prend son inclinaison de vol image par image
+  const ailesEnvol = createFlap(vol, { onFrame: (dt) => { if (relais && relais.t < 0.2) { relais.t = Math.min(0.2, relais.t + dt); placerEnVol(); } } });
   const KO_POSE = 130 / 140; // échelle de l’oiseau posé dans la scène : l’oiseau en vol part à la même taille
   let decolle = false, relais = null, volP = 0;
   function placerEnVol() {
@@ -21,12 +22,11 @@ export function initEnvol({ scene, VB, seuilEnvol, tir }) {
     const cible = [(X - r.left) / k + VB.x, (Y - r.top) / k + VB.y];
     const pente = Math.atan2(Y2 - Y, X2 - X) * 180 / Math.PI;
     // juste après le relais, l’oiseau part de l’inclinaison de l’oiseau posé (−48° : son axe), puis prend celle de la trajectoire (200 ms)
-    const e = courbes.sortie(relais.t / 0.2), ang = lerp(-48, pente * 0.6, e), s = lerp(KO_POSE, 0.5, u);
-    const [x, y] = placerVol(cible, ang, s);
+    const e = easings.out(relais.t / 0.2), ang = lerp(-48, pente * 0.6, e), s = lerp(KO_POSE, 0.5, u);
+    const [x, y] = placeFlying(cible, ang, s);
     vol.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${s.toFixed(3)}) translate(-114,-80)`);
-    ailesEnvol.st.cible = pente > 15 ? 1 : 0;
+    ailesEnvol.state.target = pente > 15 ? 1 : 0;
   }
-  ailesEnvol.st.chaqueImage = (dt) => { if (relais && relais.t < 0.2) { relais.t = Math.min(0.2, relais.t + dt); placerEnVol(); } };
   function envol() {
     if (reduit) return;
     const seuil = seuilEnvol();
@@ -34,14 +34,14 @@ export function initEnvol({ scene, VB, seuilEnvol, tir }) {
     const parti = scrollY > seuil;
     if (parti !== decolle) {
       decolle = parti; relais = null;
-      tir.envol(parti, (poitrine) => { if (!decolle) return; relais = { poitrine, p0: Math.min(volP, 0.9), t: 0 }; ailesEnvol.st.c = 0; ailesEnvol.st.plane = 0; envol(); });
+      tir.envol(parti, (poitrine) => { if (!decolle) return; relais = { poitrine, p0: Math.min(volP, 0.9), t: 0 }; ailesEnvol.state.c = 0; ailesEnvol.state.glide = 0; envol(); });
     }
     const enVol = parti && relais && volP < 1;
     pose.style.visibility = parti && relais ? 'hidden' : 'visible';
     vol.toggleAttribute('hidden', !enVol);
-    if (!enVol) { ailesEnvol.arreter(); return; }
+    if (!enVol) { ailesEnvol.stop(); return; }
     placerEnVol();
-    ailesEnvol.demarrer();
+    ailesEnvol.start();
   }
   envol();
   return envol;

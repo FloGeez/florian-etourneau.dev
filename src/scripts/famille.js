@@ -1,7 +1,6 @@
 /* La famille sur le fil du pied de page : le retour au nid de Florian, le cadrage sur petit écran, le dribble du fils du milieu. */
-import { aile, opaciteAileDessus, courbes, lerp, seg, bump, corpsPose, pattesPose, placerVol, POSE } from './oiseau.js';
-import { animer } from './horloge.js';
-import { battement } from './vol.js';
+import { wing, wingOverlayOpacity, easings, lerp, progress, bump, perchedBody, perchedLegs, placeFlying, PERCHED } from '@etourneau/murmuration/oiseau';
+import { animate, createFlap } from '@etourneau/murmuration/flight';
 
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -16,50 +15,50 @@ export function initFamille() {
   arrivee.querySelectorAll('clipPath').forEach((c) => { const ancien = c.id; c.id = ancien + '-a'; arrivee.querySelectorAll(`[clip-path="url(#${ancien})"]`).forEach((n) => n.setAttribute('clip-path', `url(#${c.id})`)); });
   arrivee.setAttribute('hidden', '');
   nid.parentNode.insertBefore(arrivee, nid.nextSibling);
-  const ailesArrivee = battement(arrivee);
+  const ailesArrivee = createFlap(arrivee);
   // l’oiseau du nid, articulé (même repère que la charte, placé à x 576,5 / y 77, échelle 104/140)
   const corpsNid = document.getElementById('corps-nid'), pattesNid = document.getElementById('pattes-nid');
   const aileNid = document.getElementById('aile-pliee-nid'), aileNidDessus = document.getElementById('aile-dessus-nid');
   const NID = { x: 576.5, y: 77, k: 104 / 140 };
   const versFamille = (p) => [NID.x + (p[0] - 40) * NID.k, NID.y + (p[1] - 24) * NID.k];
   function dessinerNid(e) {
-    corpsNid.setAttribute('transform', corpsPose(e).transform);
-    pattesNid.setAttribute('d', pattesPose(e, e.pieds, e.doigts));
-    const d = aile(e.leve); aileNid.setAttribute('d', d); aileNidDessus.setAttribute('d', d);
-    aileNidDessus.setAttribute('opacity', opaciteAileDessus(e.leve).toFixed(3));
+    corpsNid.setAttribute('transform', perchedBody(e).transform);
+    pattesNid.setAttribute('d', perchedLegs(e, e.pieds, e.doigts));
+    const d = wing(e.leve); aileNid.setAttribute('d', d); aileNidDessus.setAttribute('d', d);
+    aileNidDessus.setAttribute('opacity', wingOverlayOpacity(e.leve).toFixed(3));
   }
   // la pose du nid, t secondes après le relais : chute, contact (écrasement), redressement, repli de l’aile
   const poser = (t) => {
-    const chute = courbes.entree(seg(t, 0, 0.22)), contact = seg(t, 0.22, 0.6), repli = courbes.entreeSortie(seg(t, 0.3, 0.75));
+    const chute = easings.in(progress(t, 0, 0.22)), contact = progress(t, 0.22, 0.6), repli = easings.inOut(progress(t, 0.3, 0.75));
     return {
       dy: -16 * (1 - chute) + 4 * bump(contact) * (1 - contact * 0.4),
-      bascule: 18 - 18 * courbes.depassement(seg(t, 0.1, 0.65), 2.2),
+      tilt: 18 - 18 * easings.overshoot(progress(t, 0.1, 0.65), 2.2),
       sx: 1 + 0.04 * bump(contact), sy: 1 - 0.08 * bump(contact),
       leve: 1 - repli,
-      pieds: POSE.PIEDS.map((q) => [q[0] + 8 * (1 - chute), q[1]]),
+      pieds: PERCHED.FEET.map((q) => [q[0] + 8 * (1 - chute), q[1]]),
       doigts: [20 * (1 - chute), 20 * (1 - chute)],
     };
   };
   function atterrir() {
     const D = 1.9, POSE_FIN = 0.95, S0 = 0.82;
     // la poitrine de l’oiseau posé au moment du relais : la trajectoire y mène
-    const cible = versFamille(corpsPose(poser(0)).point(POSE.POITRINE));
+    const cible = versFamille(perchedBody(poser(0)).point(PERCHED.CHEST));
     const Q = [[-160, -70], [260, -120], [cible[0] - 88, cible[1] - 45], cible];
     const qpt = (u) => { const a = 1 - u; return [0, 1].map((k) => a * a * a * Q[0][k] + 3 * a * a * u * Q[1][k] + 3 * a * u * u * Q[2][k] + u * u * u * Q[3][k]); };
     let t = 0, relaye = false;
-    arrivee.removeAttribute('hidden'); ailesArrivee.st.c = 0; ailesArrivee.st.plane = 0; ailesArrivee.st.tPlane = 0.05; ailesArrivee.demarrer();
-    animer((dt) => {
+    arrivee.removeAttribute('hidden'); ailesArrivee.state.c = 0; ailesArrivee.state.glide = 0; ailesArrivee.state.glideAt = 0.05; ailesArrivee.start();
+    animate((dt) => {
       t += dt;
       if (!relaye) {
         const r = Math.min(1, t / D), u = 1 - Math.pow(1 - r, 2.2);
         const q = qpt(u), q2 = qpt(Math.min(1, u + 0.01));
         const tangente = Math.atan2(q2[1] - q[1], q2[0] - q[0]) * 180 / Math.PI;
-        const ang = lerp(tangente * 0.5, -30, courbes.entreeSortie(seg(r, 0.8, 1))); // il se redresse pour freiner
+        const ang = lerp(tangente * 0.5, -30, easings.inOut(progress(r, 0.8, 1))); // il se redresse pour freiner
         const s = lerp(S0, NID.k, u);
-        ailesArrivee.st.cible = r > 0.7 ? 1 : 0; // plané ailes levées sur la fin
-        const [x, y] = placerVol(q, ang, s);
+        ailesArrivee.state.target = r > 0.7 ? 1 : 0; // plané ailes levées sur la fin
+        const [x, y] = placeFlying(q, ang, s);
         arrivee.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${s.toFixed(3)}) translate(-114,-80)`);
-        if (r >= 1) { relaye = true; t = 0; ailesArrivee.arreter(); arrivee.setAttribute('hidden', ''); nid.classList.remove('attend'); }
+        if (r >= 1) { relaye = true; t = 0; ailesArrivee.stop(); arrivee.setAttribute('hidden', ''); nid.classList.remove('attend'); }
         return;
       }
       dessinerNid(poser(t));

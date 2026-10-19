@@ -1,8 +1,7 @@
 /* Où se pose la nuée, section par section : le fil de l’accueil, les pictos de « maintenant », les lignes du parcours,
-   les boutons du contact. Chaque section est une scène du moteur (moteur-nuee.js) ; majEtape() suit l’étape du récit en cours.
+   les boutons du contact. Chaque section est une scène du moteur (@etourneau/murmuration) ; majEtape() suit l’étape du récit en cours.
    Avec ?debug dans l’adresse : la scène en cours, les places et la zone de l’essaim s’affichent. */
-import { createNuee } from './nuee.js';
-import { creerMoteur } from './moteur-nuee.js';
+import { createMurmuration, createScenes } from '@etourneau/murmuration';
 import { initTheme } from './theme.js';
 import { FORMES, echantillon, minuteRennes } from './formes.js';
 import { G } from './scene-accueil.js';
@@ -13,8 +12,8 @@ const css = (n) => getComputedStyle(root).getPropertyValue(n).trim();
 const debug = new URLSearchParams(location.search).has('debug');
 
 export function initNuee({ scene, VB, seuilEnvol }) {
-  const couleurs = () => [css('--fe-oiseaux'), css('--fe-oiseaux'), css('--fe-oiseaux-2')];
-  const nuee = createNuee(document.getElementById('nuee'), { count: innerWidth <= 860 ? 200 : 320, colors: couleurs(), debug });
+  const couleurs = () => [css('--fe-birds'), css('--fe-birds'), css('--fe-birds-2')];
+  const nuee = createMurmuration(document.getElementById('nuee'), { count: innerWidth <= 860 ? 200 : 320, colors: couleurs(), debug });
   initTheme(() => nuee.setColors(couleurs()));
 
   const pointsFil = () => {
@@ -86,7 +85,7 @@ export function initNuee({ scene, VB, seuilEnvol }) {
     const x = innerWidth - margeParcours() / 2, bas = Math.min(innerHeight * 0.8, l.bottom);
     const haut = (r.top + r.bottom) / 2;
     const pts = haut > 80 ? [[l.left + l.width * 0.5, haut], [x, haut], [x, bas]] : [[x, innerHeight * 0.15], [x, bas]];
-    return { chemin: pts.map(([px, py]) => [px + scrollX, py + scrollY]) };
+    return { path: pts.map(([px, py]) => [px + scrollX, py + scrollY]) };
   };
   // Contact : 3 oiseaux sur « Copier », 2 sur « Écrire un message » (2 sur « Copier » seulement, sur petit écran), sur le bord du haut
   const pointsBoutons = () => {
@@ -101,44 +100,44 @@ export function initNuee({ scene, VB, seuilEnvol }) {
   const liste = document.querySelector('.parcours'), famille = document.querySelector('.famille');
   const vh = () => innerHeight;
 
-  /* Les scènes, de haut en bas : la première active l’emporte (moteur-nuee.js). Aucune : la nuée vole librement. */
-  const moteur = creerMoteur(nuee, [
+  /* Les scènes, de haut en bas : la première active l’emporte (createScenes). Aucune : la nuée vole librement. */
+  const moteur = createScenes(nuee, [
     // l’accueil : sur le fil ; les oiseaux sans place tournent à droite du titre (sur petit écran, ils se serrent sur le fil)
     {
-      nom: 'fil',
+      name: 'fil',
       active: () => scrollY < Math.max(30, seuilEnvol() * 0.6),
-      pose: ({ premiere, force }) => ({ places: pointsFil(), instant: premiere || force, reste: innerWidth < 700 ? 'doubler' : 'tourner', zone: orbiteAccueil }),
+      pose: ({ first, force }) => ({ points: pointsFil(), instant: first || force, rest: innerWidth < 700 ? 'double' : 'circle', zone: orbiteAccueil }),
     },
     // « maintenant » : le picto de l’étape en cours, dans la scène collée ; l’essaim tourne au-dessus
     {
-      nom: 'forme',
+      name: 'forme',
       active: () => { const r = recit.getBoundingClientRect(); return r.top < vh() * 0.55 && r.bottom > vh() * 0.6; },
-      variante: formeActive,
-      pose: ({ variante }) => { const el = zoneForme(); return { places: pointsForme(variante.split('@')[0], el), ancre: origine(el), reste: 'tourner', zone: orbiteForme(el) }; },
+      variant: formeActive,
+      pose: ({ variant }) => { const el = zoneForme(); return { points: pointsForme(variant.split('@')[0], el), anchor: origine(el), rest: 'circle', zone: orbiteForme(el) }; },
     },
     // le parcours : un oiseau posé = deux mois ; un petit essaim dans la marge de droite s’il y en a une, les autres quittent l’écran
     {
-      nom: 'parcours',
+      name: 'parcours',
       active: () => { const r = liste.getBoundingClientRect(); return r.top < vh() * 0.75 && r.bottom > vh() * 0.35; },
-      pose: () => ({ places: pointsParcours(), reste: margeParcours() >= 140 ? 'tourner' : 'partir', zone: orbiteParcours, garder: ESSAIM_PARCOURS }),
+      pose: () => ({ points: pointsParcours(), rest: margeParcours() >= 140 ? 'circle' : 'leave', zone: orbiteParcours, keep: ESSAIM_PARCOURS }),
     },
     // la liste passée, la nuée s’en va, sauf quelques oiseaux qui se posent sur les boutons du contact (farouches)
     {
-      nom: 'contact',
+      name: 'contact',
       active: () => famille.getBoundingClientRect().top < vh() * 0.85 || liste.getBoundingClientRect().bottom <= vh() * 0.35,
-      pose: () => ({ places: pointsBoutons(), instant: false, reste: 'partir', farouches: true }),
+      pose: () => ({ points: pointsBoutons(), instant: false, rest: 'leave', shy: true }),
     },
   ], { debug });
 
   // Les boutons changent de taille (« Copié », « Écrire un message » qui apparaît) : les oiseaux se recalent
   if ('ResizeObserver' in window) {
-    const recaler = new ResizeObserver(() => { if (moteur.scene === 'contact') moteur.maj(true); });
+    const recaler = new ResizeObserver(() => { if (moteur.scene === 'contact') moteur.update(true); });
     ['copier', 'ecrire'].forEach((id) => { const el = document.getElementById(id); if (el) recaler.observe(el); });
   }
-  addEventListener('resize', () => { majEtape(); moteur.maj(true); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moteur.maj(true));
-  majEtape(); moteur.maj(true);
+  addEventListener('resize', () => { majEtape(); moteur.update(true); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moteur.update(true));
+  majEtape(); moteur.update(true);
 
   // au défilement (une fois par image, voir site.js)
-  return { maj() { majEtape(); moteur.maj(); } };
+  return { maj() { majEtape(); moteur.update(); } };
 }

@@ -1,8 +1,8 @@
-/* Florian Etourneau — site. Les tokens viennent de la charte : tokens.css, importé avant ce fichier. */
+/* Florian Etourneau — site. Les tokens viennent de @etourneau/tokens (tokens.css), importé avant ce fichier. */
 :root {
   /* alias du site */
-  --gouttiere: var(--fe-page-gouttiere);
-  --largeur: var(--fe-page-largeur);
+  --gouttiere: var(--fe-page-gutter);
+  --largeur: var(--fe-page-width);
 }
 
 /* ——— Base ——— */
@@ -10,7 +10,7 @@
 html { scroll-behavior: smooth; overflow-x: clip; }
 body {
   margin: 0; background: var(--fe-bg); color: var(--fe-text);
-  font-family: var(--fe-font-titre); font-size: var(--fe-size-body); line-height: var(--fe-leading-body);
+  font-family: var(--fe-font-heading); font-size: var(--fe-size-body); line-height: var(--fe-leading-body);
   -webkit-font-smoothing: antialiased; overflow-x: clip;
 }
 a { color: var(--fe-primary); text-underline-offset: 3px; }
@@ -25,27 +25,27 @@ a:hover { color: var(--fe-primary-hover); }
 main, .pied { position: relative; z-index: 1; }
 
 /* ——— SVG : oiseau et décor pilotés par les tokens ——— */
-.fe-corps { fill: var(--fe-logo-corps); }
-.fe-aile { fill: var(--fe-logo-aile); }
+.fe-corps { fill: var(--fe-logo-body); }
+.fe-aile { fill: var(--fe-logo-wing); }
 /* l’aile lointaine de l’oiseau en vol : un ton entre l’aile et le dos */
-.fe-aile-loin { fill: var(--fe-logo-aile-loin); }
-.fe-ventre, .fe-reflet { fill: var(--fe-logo-ventre); }
-.fe-bec { fill: var(--fe-logo-bec); }
-.fe-oeil { fill: var(--fe-encre); }
+.fe-aile-loin { fill: var(--fe-logo-wing-far); }
+.fe-ventre, .fe-reflet { fill: var(--fe-logo-belly); }
+.fe-bec { fill: var(--fe-logo-beak); }
+.fe-oeil { fill: var(--fe-ink); }
 /* la famille : palette plumage de la charte, identique en clair et en sombre */
-.fe-bec-fixe { fill: var(--fe-encre); }
-.fe-femelle { fill: var(--fe-plumage-femelle); }
-.fe-femelle-aile { fill: var(--fe-plumage-femelle-aile); }
-.fe-aine { fill: var(--fe-plumage-aine); }
-.fe-cadet { fill: var(--fe-plumage-cadet); }
-.fe-aile-jeune { fill: var(--fe-nuit); }
-.fe-creme { fill: var(--fe-plumage-creme); }
-.fe-mouch, .fe-mouch-femelle { fill: none; stroke: var(--fe-plumage-moucheture); stroke-width: 2.2; stroke-linecap: round; }
-.fe-mouch-femelle { stroke: var(--fe-plumage-femelle); }
+.fe-bec-fixe { fill: var(--fe-ink); }
+.fe-femelle { fill: var(--fe-plumage-female); }
+.fe-femelle-aile { fill: var(--fe-plumage-female-wing); }
+.fe-aine { fill: var(--fe-plumage-eldest); }
+.fe-cadet { fill: var(--fe-plumage-middle); }
+.fe-aile-jeune { fill: var(--fe-night); }
+.fe-creme { fill: var(--fe-plumage-cream); }
+.fe-mouch, .fe-mouch-femelle { fill: none; stroke: var(--fe-plumage-speckle); stroke-width: 2.2; stroke-linecap: round; }
+.fe-mouch-femelle { stroke: var(--fe-plumage-female); }
 /* le ballon : seul aplat terre cuite de l’identité */
-.fe-ballon { fill: var(--fe-terre-500); }
-.fe-couture { fill: none; stroke: var(--fe-nuit); }
-.fe-pattes, .fe-pattes-l { fill: none; stroke: var(--fe-pattes); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.fe-ballon { fill: var(--fe-terracotta-500); }
+.fe-couture { fill: none; stroke: var(--fe-night); }
+.fe-pattes, .fe-pattes-l { fill: none; stroke: var(--fe-legs); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .fe-fil { fill: none; stroke: var(--fe-text); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .fe-trajectoire { fill: none; stroke: var(--fe-text-muted); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 0.1 11; transition: opacity .25s; }
 .fe-visee { fill: none; stroke: var(--fe-text-muted); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 0.1 7; }
@@ -112,7 +112,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
 #ballon:focus { outline: none; }
 #ballon:focus-visible .peau-ballon { stroke: var(--fe-focus); stroke-width: 4; }
 
-/* Le tableau Bodet, accroché au panneau. Exception de la charte : il garde ses couleurs d’afficheur (--fe-afficheur-*).
+/* Le tableau Bodet, accroché au panneau. Exception de la charte : il garde ses couleurs d’afficheur (--fe-scoreboard-*).
    Il est en HTML : sa taille suit l’échelle typographique
    et la grille de 4 quelle que soit la largeur de la scène ; seule sa position suit l’illustration.
    Il n’apparaît qu’à la première prise de ballon (.range). */
@@ -122,8 +122,8 @@ h1 .deux { color: var(--fe-primary); display: block; }
   left: min(var(--poteau-x, 90.78%), calc(100% - 16px - var(--w) / 2));
   bottom: calc(var(--panneau-bas, 88.55%) + 8px); transform: translateX(-50%);
   display: grid; gap: 4px; padding: 8px 12px 8px;
-  background: var(--fe-afficheur-fond); border: 1px solid var(--fe-border); border-radius: 6px;
-  color: var(--fe-afficheur-texte); text-align: center;
+  background: var(--fe-scoreboard-bg); border: 1px solid var(--fe-border); border-radius: 6px;
+  color: var(--fe-scoreboard-text); text-align: center;
   transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1.15), border-color .2s, box-shadow .2s;
 }
 /* La tirade d’Allen Iverson, au-dessus du panneau : au survol, ou au toucher (.bulle, posée par tir.js) */
@@ -132,21 +132,21 @@ h1 .deux { color: var(--fe-primary); display: block; }
   content: attr(data-bulle); position: absolute; bottom: calc(100% + 8px); right: 0; z-index: 2; width: min(240px, calc(100vw - 32px)); padding: 8px 12px;
   background: var(--fe-surface); border: 1px solid var(--fe-border); border-radius: 6px;
   font: 400 12px/1.4 var(--fe-font-code); color: var(--fe-text-muted); text-align: left;
-  opacity: 0; transform: translateY(4px); transition: opacity var(--fe-duration-courte), transform var(--fe-duration-courte) var(--fe-ease-sortie); pointer-events: none;
+  opacity: 0; transform: translateY(4px); transition: opacity var(--fe-duration-short), transform var(--fe-duration-short) var(--fe-ease-out); pointer-events: none;
 }
 @media (hover: hover) { .tableau:hover::after { opacity: 1; transform: none; transition-delay: .4s; } }
 .tableau.bulle::after { opacity: 1; transform: none; }
 .tableau.range { opacity: 0; transform: translate(-50%, -24px); pointer-events: none; }
 .tableau-potence { position: absolute; left: var(--poteau-x, 90.78%); bottom: var(--panneau-bas, 88.55%); width: 3px; height: 8px; transform: translateX(-50%); background: var(--fe-text); transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1.15); }
 .tableau-potence.range { opacity: 0; transform: translate(-50%, -8px) scaleY(0); }
-.tableau-marque { font: 800 12px/1 var(--fe-font-titre); letter-spacing: .24em; padding-left: .24em; }
+.tableau-marque { font: 800 12px/1 var(--fe-font-heading); letter-spacing: .24em; padding-left: .24em; }
 .tableau-cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 .tableau-case { display: grid; gap: 4px; }
-.tableau-case b { display: block; padding: 4px 0; border-radius: 4px; background: var(--fe-afficheur-case); font: 500 24px/1 var(--fe-font-code); color: var(--fe-afficheur-led); font-variant-numeric: tabular-nums; }
-.tableau-case-24 b { color: var(--fe-afficheur-led-alerte); }
+.tableau-case b { display: block; padding: 4px 0; border-radius: 4px; background: var(--fe-scoreboard-cell); font: 500 24px/1 var(--fe-font-code); color: var(--fe-scoreboard-led); font-variant-numeric: tabular-nums; }
+.tableau-case-24 b { color: var(--fe-scoreboard-led-alert); }
 .tableau-case b.urgent { font-size: 20px; line-height: 1.2; }
-.tableau-case i { font: 400 10px/1 var(--fe-font-code); font-style: normal; color: var(--fe-afficheur-libelle); letter-spacing: .04em; }
-.tableau.buzz { border-color: var(--fe-afficheur-led-alerte); box-shadow: 0 0 0 2px var(--fe-afficheur-led-alerte); }
+.tableau-case i { font: 400 10px/1 var(--fe-font-code); font-style: normal; color: var(--fe-scoreboard-label); letter-spacing: .04em; }
+.tableau.buzz { border-color: var(--fe-scoreboard-led-alert); box-shadow: 0 0 0 2px var(--fe-scoreboard-led-alert); }
 .tableau.buzz #t-24 { animation: clignote .5s steps(2) 4; }
 .tableau.point #t-paniers { animation: clignote .3s steps(2) 3; }
 @keyframes clignote { 50% { opacity: .15; } }
@@ -157,8 +157,8 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .indice-tir.a-gauche svg { transform: scaleX(-1); }
 .indice-tir.parti { opacity: 0; animation: none; }
 /* Le premier tir : BLOCKED BY ÉTOURNEAU ! surgit au point du contre, puis s’efface */
-.contre { position: absolute; margin: 0; transform: translateX(-50%); font: 800 20px/1 var(--fe-font-titre); letter-spacing: .02em; color: var(--fe-accent); white-space: nowrap; pointer-events: none; opacity: 0; }
-.contre.montre { animation: contre 1.3s var(--fe-ease-sortie) forwards; }
+.contre { position: absolute; margin: 0; transform: translateX(-50%); font: 800 20px/1 var(--fe-font-heading); letter-spacing: .02em; color: var(--fe-accent); white-space: nowrap; pointer-events: none; opacity: 0; }
+.contre.montre { animation: contre 1.3s var(--fe-ease-out) forwards; }
 @keyframes contre { 0% { opacity: 0; transform: translateX(-50%) scale(.6) rotate(-6deg); } 12% { opacity: 1; transform: translateX(-50%) scale(1.12) rotate(-3deg); } 24%, 70% { opacity: 1; transform: translateX(-50%) scale(1) rotate(-3deg); } 100% { opacity: 0; transform: translate(-50%, -12px) rotate(-3deg); } }
 @media (max-width: 600px) { .contre { font-size: 16px; } }
 @keyframes invite { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
@@ -178,7 +178,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
 /* Le repère se place au-dessus du contenu, dans toutes les sections */
 .section .repere-section { margin-bottom: 24px; }
 .etiquettes { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
-.etiquettes li { display: inline-flex; align-items: center; height: 28px; padding: 0 16px 0 10px; background: var(--fe-primary-soft); color: var(--fe-primary); font-family: var(--fe-font-titre); font-size: 14px; font-weight: 700; clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%); border-radius: 4px 0 0 4px; }
+.etiquettes li { display: inline-flex; align-items: center; height: 28px; padding: 0 16px 0 10px; background: var(--fe-primary-soft); color: var(--fe-primary); font-family: var(--fe-font-heading); font-size: 14px; font-weight: 700; clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%); border-radius: 4px 0 0 4px; }
 
 /* ——— Maintenant : un récit ———
    La scène reste collée pendant qu’on fait défiler les étapes ; la nuée y dessine la forme de l’étape en cours.
@@ -254,12 +254,12 @@ h1 .deux { color: var(--fe-primary); display: block; }
 /* Copier l’adresse : le ballon rebondit et sa trace forme la coche */
 #adresse { background: linear-gradient(var(--fe-primary-soft), var(--fe-primary-soft)) no-repeat 0 100% / 0% 38%; transition: color .3s, background-size .5s cubic-bezier(.2,.8,.2,1); }
 .copie-ok #adresse { color: var(--fe-primary); background-size: 100% 38%; }
-.copier { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: var(--fe-surface); color: var(--fe-text); font: 700 16px var(--fe-font-titre); cursor: pointer; transition: background .25s, border-color .25s, color .25s, transform var(--fe-duration-courte) var(--fe-ease-depassement); }
+.copier { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: var(--fe-surface); color: var(--fe-text); font: 700 16px var(--fe-font-heading); cursor: pointer; transition: background .25s, border-color .25s, color .25s, transform var(--fe-duration-short) var(--fe-ease-overshoot); }
 .copier .picto { color: currentColor; width: 18px; height: 18px; }
 /* Survol (souris seulement) : bordure violette, fond teinté ; le texte ne change pas (« Écrire un message » ouvert le passe en violet).
    Appui : le bouton s’enfonce, puis revient avec un léger dépassement. */
 @media (hover: hover) { .copier:hover:not(.copie):not(.envoyer) { border-color: var(--fe-primary); background: var(--fe-primary-soft); } }
-.copier:active:not(:disabled) { transform: scale(.96); transition-duration: .25s, .25s, .25s, var(--fe-duration-eclair); transition-timing-function: ease, ease, ease, var(--fe-ease-sortie); }
+.copier:active:not(:disabled) { transform: scale(.96); transition-duration: .25s, .25s, .25s, var(--fe-duration-flash); transition-timing-function: ease, ease, ease, var(--fe-ease-out); }
 .copier .coche { display: none; width: 24px; height: 24px; margin: -2px 0; overflow: visible; }
 .copier.copie { background: var(--fe-primary); border-color: var(--fe-primary); color: var(--fe-on-primary); animation: rebond-bouton .5s cubic-bezier(.3,1.6,.5,1); }
 .copier.copie .enveloppe-ic { display: none; }
@@ -274,7 +274,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .formulaire .large { grid-column: 1 / -1; }
 @media (max-width: 600px) { .formulaire { grid-template-columns: 1fr; } }
 .champ { display: flex; flex-direction: column; gap: 6px; }
-.champ label { font: 700 14px var(--fe-font-titre); color: var(--fe-text); }
+.champ label { font: 700 14px var(--fe-font-heading); color: var(--fe-text); }
 /* 16 px (la charte dit 15) : en dessous, Safari iOS zoome sur le champ */
 .champ input, .champ textarea { width: 100%; min-height: 44px; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--fe-border); background: var(--fe-surface); color: var(--fe-text); font: inherit; font-weight: 400; font-size: 16px; line-height: 1.5; }
 .champ textarea { resize: vertical; min-height: 116px; }
@@ -296,9 +296,9 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .formulaire.se-plie > * { opacity: 0; }
 .envoi { max-width: 760px; margin: 32px 0 0; }
 .envoi[hidden] { display: none; }
-.envoi-texte { margin: 0; font: 700 20px var(--fe-font-titre); color: var(--fe-text); }
+.envoi-texte { margin: 0; font: 700 20px var(--fe-font-heading); color: var(--fe-text); }
 .envoi-texte:focus { outline: none; }
-.envoi-texte span { font: 400 16px var(--fe-font-titre); color: var(--fe-text-muted); }
+.envoi-texte span { font: 400 16px var(--fe-font-heading); color: var(--fe-text-muted); }
 .envoi-vol { position: absolute; left: 0; top: 0; z-index: 2; overflow: visible; pointer-events: none; }
 .envoi-vol[hidden] { display: none; }
 .envoi-trace circle { fill: var(--fe-text-muted); }

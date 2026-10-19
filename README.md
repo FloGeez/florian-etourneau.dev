@@ -41,14 +41,11 @@ src/
   data/parcours.ts         postes et durées (un oiseau = deux mois)
   scripts/
     site.js                branche les modules ci-dessous et les fait suivre le défilement
-    nuee.js                la nuée (canvas fixe, coordonnées document)
-    moteur-nuee.js         le moteur : choisit la scène à l’écran et y pose la nuée
     scenes.js              les scènes de la page (fil, pictos, parcours, contact) ; ?debug les affiche
-    formes.js              les formes que dessine la nuée et leur échantillonnage
-    oiseau.js              l’oiseau articulé (copie de la charte)
+    formes.js              les formes de « maintenant » (travail, éditeur, MaxDS, Rennes)
     scene-accueil.js       cadrage de la scène du tir et seuil d’envol
     tir.js                 le mini-jeu du tir (et le contre du premier tir)
-    envol.js, vol.js       l’envol de Florian, le battement d’ailes
+    envol.js               l’envol de Florian
     famille.js             le retour au nid, le dribble
     rennes.js              l’heure et la météo
     copier.js, entete.js   copier l’adresse, l’en-tête au défilement
@@ -57,21 +54,21 @@ src/
     sous-le-capot.js       le mot laissé dans la console
     contact.js             envoi du formulaire sans rechargement
   styles/
-    tokens.css             copie des tokens de la charte — ne pas modifier ici
     global.css             styles du site, uniquement à partir des tokens
   pages/index.astro        assemble la page
   pages/404.astro          « Air ball » : la page introuvable
   actions/index.ts         actions `defi` et `contact` : défi ALTCHA, validation, envoi par Resend (seul code serveur)
-outils/copier-tokens.mjs   (local, hors git) recopie tokens.css depuis ../etourneau-identite
 outils/og-image.html       (local, hors git) source de public/og-image.png, commande d’export en tête du fichier
 ```
 
 Les scripts sont des modules ES bundlés par Astro ; ils ciblent les éléments par `id`,
 donc garder les `id` des composants en cas de modification.
 
-La charte (dossier voisin `etourneau-identite`) est la source des couleurs, tailles et polices :
-aucune couleur en dur dans le site, tout passe par `--fe-*`. Après un changement de tokens
-côté charte, lancer `node outils/copier-tokens.mjs` (outil local, hors git : il lit le dossier voisin).
+La marque vient de [`@etourneau`](https://github.com/FloGeez/etourneau) : `@etourneau/tokens` pour les couleurs,
+tailles et polices (aucune couleur en dur dans le site, tout passe par `--fe-*`), `@etourneau/murmuration` pour la nuée,
+son moteur de scènes, l’échantillonnage des formes et l’oiseau articulé. Le site n’y ajoute que son histoire :
+ses scènes, ses formes, le tir, l’envol, la famille. Pour travailler sur la marque et le site en même temps,
+lier les packages du dossier voisin : `npm link ../etourneau/packages/tokens ../etourneau/packages/murmuration`.
 
 ## Déploiement
 
