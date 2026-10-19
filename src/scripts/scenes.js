@@ -1,9 +1,8 @@
 /* Où se pose la nuée, section par section : le fil de l’accueil, les pictos de « maintenant », les lignes du parcours,
    les boutons du contact. Chaque section est une scène du moteur (@etourneau/murmuration) ; majEtape() suit l’étape du récit en cours.
    Avec ?debug dans l’adresse : la scène en cours, les places et la zone de l’essaim s’affichent. */
-import { createMurmuration, createScenes } from '@etourneau/murmuration';
+import { createMurmuration, createScenes, shapes, sampleShape, fitShape } from '@etourneau/murmuration';
 import { initTheme } from './theme.js';
-import { FORMES, echantillon, minuteRennes } from './formes.js';
 import { G } from './scene-accueil.js';
 
 const root = document.documentElement;
@@ -32,10 +31,8 @@ export function initNuee({ scene, VB, seuilEnvol }) {
   // Où dessiner : la grande scène collée (bureau) ou l’emplacement réservé au-dessus de l’étape (mobile)
   const zoneForme = () => (innerWidth <= 860 ? actif.querySelector('.etape-scene') : perchoir);
   const origine = (el) => () => { const r = el.getBoundingClientRect(); return [r.left + scrollX, r.top + scrollY]; };
-  const pointsForme = (nom, el) => {
-    const r = el.getBoundingClientRect(), k = Math.min(r.width / 720, r.height / 640) * (innerWidth <= 860 ? 1.1 : 1.08), ox = (r.width - 720 * k) / 2, oy = (r.height - 640 * k) / 2;
-    return echantillon(nom, nbForme()).map(([x, y], i) => [ox + x * k, oy + y * k + 6]);
-  };
+  // les formes du récit viennent de @etourneau/murmuration (data-forme : work, editor, maxds, basket), partagées avec la charte
+  const pointsForme = (nom, el) => fitShape(sampleShape(shapes[nom], nbForme()), el.getBoundingClientRect(), { zoom: innerWidth <= 860 ? 1.1 : 1.08, dy: 6 });
   const lignes = [...document.querySelectorAll('.parcours li[data-annees]')];
   const pointsParcours = () => {
     const pts = [];
@@ -59,12 +56,12 @@ export function initNuee({ scene, VB, seuilEnvol }) {
 
   const formeActive = () => {
     const f = actif.dataset.forme.split(' ');
-    const n = f.length > 1 && !reduit ? f[Math.floor(performance.now() / 3500) % f.length] : f[0];
-    return n === 'rennes' ? n + '@' + minuteRennes() : n;
+    return f.length > 1 && !reduit ? f[Math.floor(performance.now() / 3500) % f.length] : f[0];
   };
   // Prépare les formes pendant les temps morts, pour que la nuée parte sans à-coup
   const aLoisir = window.requestIdleCallback || ((f) => setTimeout(f, 200));
-  const prechauffer = () => Object.keys(FORMES).forEach((n, i) => aLoisir(() => echantillon(n, nbForme()), { timeout: 2000 + i * 300 }));
+  const formesRecit = [...new Set(etapes.flatMap((e) => e.dataset.forme.split(' ')))];
+  const prechauffer = () => formesRecit.forEach((n, i) => aLoisir(() => sampleShape(shapes[n], nbForme()), { timeout: 2000 + i * 300 }));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(prechauffer); else prechauffer();
   // Où tourne l’essaim des oiseaux sans place, section par section — jamais sur le texte
   const titre = document.querySelector('.accueil h1');
@@ -113,7 +110,7 @@ export function initNuee({ scene, VB, seuilEnvol }) {
       name: 'forme',
       active: () => { const r = recit.getBoundingClientRect(); return r.top < vh() * 0.55 && r.bottom > vh() * 0.6; },
       variant: formeActive,
-      pose: ({ variant }) => { const el = zoneForme(); return { points: pointsForme(variant.split('@')[0], el), anchor: origine(el), rest: 'circle', zone: orbiteForme(el) }; },
+      pose: ({ variant }) => { const el = zoneForme(); return { points: pointsForme(variant, el), anchor: origine(el), rest: 'circle', zone: orbiteForme(el) }; },
     },
     // le parcours : un oiseau posé = deux mois ; un petit essaim dans la marge de droite s’il y en a une, les autres quittent l’écran
     {
