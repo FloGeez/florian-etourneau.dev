@@ -14,16 +14,13 @@
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.11",
-    "@etourneau/brand": "file:../etourneau/packages/brand",
-    "@etourneau/murmuration": "file:../etourneau/packages/murmuration",
-    "@etourneau/tokens": "file:../etourneau/packages/tokens",
+    "@etourneau/brand": "^0.1.1",
+    "@etourneau/murmuration": "^0.1.1",
+    "@etourneau/tokens": "^0.1.1",
     "altcha-lib": "^2.5.0",
     "astro": "^7.3.0"
   },
   "engines": {
     "node": ">=22.12.0"
-  },
-  "overrides": {
-    "@flogeez/murmuration": "file:../../murmuration"
   }
 }
