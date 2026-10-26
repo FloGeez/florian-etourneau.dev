@@ -6,7 +6,7 @@
 import { actions, isInputError } from 'astro:actions';
 import { solveChallenge } from 'altcha-lib';
 import { deriveKey } from 'altcha-lib/algorithms/web/pbkdf2';
-import { flightWings, flightBob } from '@etourneau/murmuration/oiseau';
+import { flightWings, flightBob } from '@etourneau/starling';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ECHEC = 'L’envoi a échoué. Réessaie, ou écris-moi directement à l’adresse ci-dessus.';

@@ -1,6 +1,5 @@
 /* La famille sur le fil du pied de page : le retour au nid de Florian, le cadrage sur petit écran, le dribble du fils du milieu. */
-import { wing, wingOverlayOpacity, easings, lerp, progress, bump, perchedBody, perchedLegs, placeFlying, PERCHED } from '@etourneau/murmuration/oiseau';
-import { animate, createFlap } from '@etourneau/murmuration/flight';
+import { wing, wingOverlayOpacity, easings, lerp, progress, bump, perchedBody, perchedLegs, placeFlying, PERCHED, animate, createFlap } from '@etourneau/starling';
 
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

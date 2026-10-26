@@ -66,9 +66,9 @@ donc garder les `id` des composants en cas de modification.
 
 La marque vient de [`@etourneau`](https://github.com/FloGeez/etourneau) : `@etourneau/tokens` pour les couleurs,
 tailles et polices (aucune couleur en dur dans le site, tout passe par `--fe-*`), `@etourneau/murmuration` pour la nuée,
-son moteur de scènes, l’échantillonnage des formes et l’oiseau articulé. Le site n’y ajoute que son histoire :
+son moteur de scènes et l’échantillonnage des formes, `@etourneau/starling` pour l’oiseau articulé. Le site n’y ajoute que son histoire :
 ses scènes, ses formes, le tir, l’envol, la famille. Pour travailler sur la marque et le site en même temps,
-lier les packages du dossier voisin : `npm link ../etourneau/packages/tokens ../etourneau/packages/murmuration`.
+lier les packages du dossier voisin : `npm link ../etourneau/packages/tokens ../etourneau/packages/murmuration ../etourneau/packages/starling`.
 
 ## Déploiement
 

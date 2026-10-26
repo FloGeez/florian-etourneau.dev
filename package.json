@@ -14,9 +14,10 @@
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.11",
-    "@etourneau/brand": "^0.1.1",
-    "@etourneau/murmuration": "^0.1.1",
-    "@etourneau/tokens": "^0.1.1",
+    "@etourneau/brand": "^0.2.0",
+    "@etourneau/murmuration": "^0.2.0",
+    "@etourneau/starling": "^0.2.0",
+    "@etourneau/tokens": "^0.2.0",
     "altcha-lib": "^2.5.0",
     "astro": "^7.3.0"
   },
