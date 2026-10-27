@@ -53,6 +53,16 @@ export function initNuee({ scene, VB, seuilEnvol }) {
     etapes.forEach((e) => { const r = e.getBoundingClientRect(), d = Math.abs((r.top + r.bottom) / 2 - centre); if (d < dm) { dm = d; m = e; } });
     if (m !== actif) { actif = m; etapes.forEach((e) => e.classList.toggle('actif', e === m)); }
   };
+  // Au clavier (focus visible, pas un clic de souris) : le focus qui entre dans une étape la centre, pour que la nuée dessine son picto ;
+  // l’élément focalisé reste toujours à l’écran, même quand l’étape est plus haute que lui (mobile)
+  document.addEventListener('focusin', (ev) => {
+    const etape = ev.target.closest && ev.target.closest('.etape');
+    if (!etape || etape === actif || !ev.target.matches(':focus-visible')) return;
+    const r = etape.getBoundingClientRect(), f = ev.target.getBoundingClientRect();
+    let dy = (r.top + r.bottom) / 2 - (innerHeight + 68) / 2;
+    dy = Math.max(Math.min(dy, f.top - 84), f.bottom - innerHeight + 16);
+    scrollBy({ top: dy, behavior: reduit ? 'auto' : 'smooth' });
+  });
 
   const formeActive = () => {
     const f = actif.dataset.forme.split(' ');
