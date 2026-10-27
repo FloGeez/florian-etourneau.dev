@@ -7,6 +7,8 @@ import { G } from './scene-accueil.js';
 
 const root = document.documentElement;
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// farouches seulement sous une vraie souris : au doigt, le moteur garderait la dernière position et la promènerait au défilement
+const souris = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const css = (n) => getComputedStyle(root).getPropertyValue(n).trim();
 const debug = new URLSearchParams(location.search).has('debug');
 
@@ -115,18 +117,18 @@ export function initNuee({ scene, VB, seuilEnvol }) {
       active: () => scrollY < Math.max(30, seuilEnvol() * 0.6),
       pose: ({ first, force }) => ({ points: pointsFil(), instant: first || force, rest: innerWidth < 700 ? 'double' : 'circle', zone: orbiteAccueil }),
     },
-    // « maintenant » : le picto de l’étape en cours, dans la scène collée ; l’essaim tourne au-dessus
+    // « maintenant » : le picto de l’étape en cours, dans la scène collée ; l’essaim tourne au-dessus ; farouche sous la souris
     {
       name: 'forme',
       active: () => { const r = recit.getBoundingClientRect(); return r.top < vh() * 0.55 && r.bottom > vh() * 0.6; },
       variant: formeActive,
-      pose: ({ variant }) => { const el = zoneForme(); return { points: pointsForme(variant, el), anchor: origine(el), rest: 'circle', zone: orbiteForme(el) }; },
+      pose: ({ variant }) => { const el = zoneForme(); return { points: pointsForme(variant, el), anchor: origine(el), rest: 'circle', zone: orbiteForme(el), shy: souris }; },
     },
     // le parcours : un oiseau posé = deux mois ; un petit essaim dans la marge de droite s’il y en a une, les autres quittent l’écran
     {
       name: 'parcours',
       active: () => { const r = liste.getBoundingClientRect(); return r.top < vh() * 0.75 && r.bottom > vh() * 0.35; },
-      pose: () => ({ points: pointsParcours(), rest: margeParcours() >= 140 ? 'circle' : 'leave', zone: orbiteParcours, keep: ESSAIM_PARCOURS }),
+      pose: () => ({ points: pointsParcours(), rest: margeParcours() >= 140 ? 'circle' : 'leave', zone: orbiteParcours, keep: ESSAIM_PARCOURS, shy: souris }),
     },
     // la liste passée, la nuée s’en va, sauf quelques oiseaux qui se posent sur les boutons du contact (farouches)
     {
