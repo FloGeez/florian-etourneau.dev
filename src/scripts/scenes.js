@@ -31,7 +31,7 @@ export function initNuee({ scene, VB, seuilEnvol }) {
   // Où dessiner : la grande scène collée (bureau) ou l’emplacement réservé au-dessus de l’étape (mobile)
   const zoneForme = () => (innerWidth <= 860 ? actif.querySelector('.etape-scene') : perchoir);
   const origine = (el) => () => { const r = el.getBoundingClientRect(); return [r.left + scrollX, r.top + scrollY]; };
-  // les formes du récit viennent de @etourneau/murmuration (data-forme : work, editor, maxds, basket), partagées avec la charte
+  // les formes du récit viennent de @etourneau/murmuration (data-forme : work, maxds, editor, basket), partagées avec la charte
   const pointsForme = (nom, el) => fitShape(sampleShape(shapes[nom], nbForme()), el.getBoundingClientRect(), { zoom: innerWidth <= 860 ? 1.1 : 1.08, dy: 6 });
   const lignes = [...document.querySelectorAll('.parcours li[data-annees]')];
   const pointsParcours = () => {

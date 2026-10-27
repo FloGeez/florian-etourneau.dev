@@ -240,8 +240,15 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .parcours li { display: grid; grid-template-columns: 150px minmax(0, 1fr) 70px; gap: 4px 20px; align-items: baseline; padding-block: 14px 22px; border-top: 1px solid var(--fe-border); }
 .annees { font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-text-muted); font-variant-numeric: tabular-nums; }
 .poste { font-size: 16px; }
-.boite { font-weight: 800; font-size: 16px; }
-@media (max-width: 640px) { .parcours li { grid-template-columns: 1fr auto; } .parcours .annees { grid-column: 1 / -1; order: -1; } }
+.boite { font-weight: 800; font-size: 16px; justify-self: end; }
+.boite abbr { text-decoration: none; }
+/* MaxDS et ses missions : le fil, à gauche, relie les missions à l’entreprise ; les oiseaux se posent sur les missions */
+.parcours li.maison { padding-bottom: 0; }
+.missions { grid-column: 1 / -1; list-style: none; margin: 10px 0 0; padding: 0 0 0 18px; border-left: 2px solid var(--fe-primary); }
+.parcours .missions li { grid-template-columns: 132px minmax(0, 1fr) auto; padding-block: 10px 20px; border-top-style: dashed; }
+.missions .boite { font-weight: 700; }
+.mission { font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-text-muted); }
+@media (max-width: 640px) { .parcours li, .parcours .missions li { grid-template-columns: 1fr auto; } .parcours .annees { grid-column: 1 / -1; order: -1; } .missions { padding-left: 14px; } }
 
 /* ——— Contact ——— */
 .pied { margin-top: clamp(56px, 9vw, 120px); overflow-x: clip; }

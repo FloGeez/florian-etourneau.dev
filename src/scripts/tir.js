@@ -78,7 +78,7 @@ export function initTir({ scene, VB }) {
     // version courte quand la longue toucherait le cercle du panier (tablette, mobile)
     const libelle = indice.querySelector('span'), cercleG = (988 - VB.x) * k;
     libelle.textContent = contre.fait ? 'allez, réessaie' : 'à toi de tirer';
-    if ((bx - VB.x) * k + 16 * k + 24 + indice.offsetWidth + 12 > cercleG) libelle.textContent = contre.fait ? 'réessaie !' : 'tire !';
+    if ((bx - VB.x) * k + 16 * k + 24 + indice.offsetWidth + 12 > cercleG) libelle.textContent = contre.fait ? 'réessaie !' : 'tire !';
     const w = indice.offsetWidth, h = indice.offsetHeight;
     const droite = (bx - VB.x) * k + 16 * k + 24, gauche = (690 - VB.x) * k - 24 - w;
     const aDroite = droite + w + 16 <= W;

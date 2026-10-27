@@ -7,7 +7,7 @@ export function initRennes() {
   const meteo = document.getElementById('meteo'), temperature = document.getElementById('temperature');
   const releve = () => fetch('https://api.open-meteo.com/v1/forecast?latitude=48.11&longitude=-1.68&current=temperature_2m&timezone=Europe%2FParis')
     .then((r) => (r.ok ? r.json() : Promise.reject()))
-    .then((j) => { const t = j && j.current && j.current.temperature_2m; if (typeof t !== 'number') return; temperature.textContent = `${Math.round(t)} °C`; meteo.hidden = false; })
+    .then((j) => { const t = j && j.current && j.current.temperature_2m; if (typeof t !== 'number') return; temperature.textContent = `${Math.round(t)} °C`; meteo.hidden = false; })
     .catch(() => {});
   releve(); setInterval(releve, 15 * 60 * 1000);
 }
