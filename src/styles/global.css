@@ -177,8 +177,6 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .legende { margin: 8px 0 0; font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; color: var(--fe-text-muted); }
 /* Le repère se place au-dessus du contenu, dans toutes les sections */
 .section .repere-section { margin-bottom: 24px; }
-.etiquettes { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
-.etiquettes li { display: inline-flex; align-items: center; height: 28px; padding: 0 16px 0 10px; background: var(--fe-primary-soft); color: var(--fe-primary); font-family: var(--fe-font-heading); font-size: 14px; font-weight: 700; clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%); border-radius: 4px 0 0 4px; }
 
 /* ——— Maintenant : un récit ———
    La scène reste collée pendant qu’on fait défiler les étapes ; la nuée y dessine la forme de l’étape en cours.
@@ -190,6 +188,8 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .etape { min-height: var(--h-scene); display: flex; flex-direction: column; justify-content: center; padding-block: 24px; opacity: .32; transition: opacity .35s; }
 .etape.actif { opacity: 1; }
 .etape-scene { display: none; }
+.etiquettes { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.etiquettes li { display: inline-flex; align-items: center; height: 28px; padding: 0 16px 0 10px; background: var(--fe-primary-soft); color: var(--fe-primary); font-family: var(--fe-font-heading); font-size: 14px; font-weight: 700; clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 50%, calc(100% - 9px) 100%, 0 100%); border-radius: 4px 0 0 4px; }
 .etape-type { display: inline-flex; align-items: center; gap: 8px; font: 500 14px/1 var(--fe-font-code); color: var(--fe-accent); }
 .etape-type .picto { width: 20px; height: 20px; color: currentColor; }
 .etape h3 { font-size: 32px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
@@ -207,9 +207,169 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .etape-axes li { display: grid; grid-template-columns: 5.2em minmax(0, 1fr); column-gap: 12px; }
 .etape-axes li::before { display: none; }
 .etape-axes .axe { font: 500 14px/1 var(--fe-font-code); color: var(--fe-accent); white-space: nowrap; }
-.etape-lien { font-size: 14px; color: var(--fe-text-muted); }
-.etape-lien a { font-weight: 700; font-size: 16px; }
-.etape-lien code { font-family: var(--fe-font-code); font-size: 14px; font-weight: 500; }
+/* le résultat d’un projet : un repère chiffré, comme les marqueurs de section */
+.etape-chiffre { font: 500 14px/1.2 var(--fe-font-code); color: var(--fe-accent); }
+/* un projet : sa vignette dessinée, ses boutons */
+.vignette { display: block; width: 100%; max-width: 520px; height: auto; overflow: visible; }
+.etape-chiffre a { color: inherit; text-decoration-color: currentColor; }
+.boutons { display: flex; flex-wrap: wrap; gap: 12px; }
+.bouton { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 20px; border-radius: var(--fe-radius-md); border: 1.5px solid var(--fe-border); color: var(--fe-text); font-weight: 700; font-size: 16px; text-decoration: none; transition: border-color var(--fe-duration-short), background-color var(--fe-duration-short); }
+.bouton:hover { border-color: var(--fe-primary); }
+.bouton.principal { background: var(--fe-primary); border-color: transparent; color: var(--fe-on-primary); }
+.bouton.principal:hover { background: var(--fe-primary-hover); }
+.bouton .pointe { width: 8px; height: 10px; fill: currentColor; }
+.v-fenetre, .v-carte { fill: var(--fe-surface); stroke: var(--fe-border); stroke-width: 1.5; }
+.v-ombre { fill: var(--fe-text); opacity: .06; }
+.v-trait { fill: none; stroke: var(--fe-border); stroke-width: 1.5; }
+.v-outils text { font: 700 15px var(--fe-font-heading); fill: var(--fe-text-muted); }
+.v-outils .v-ital { font-style: italic; } .v-outils .v-soul { text-decoration: underline; }
+.v-outils rect, .v-ligne { fill: var(--fe-border); }
+.v-titre { font: 800 20px var(--fe-font-heading); fill: var(--fe-text); }
+.v-slash { font: 500 17px var(--fe-font-code); fill: var(--fe-primary); }
+.v-curseur { fill: var(--fe-primary); }
+.v-entete { fill: var(--fe-surface-2); }
+.v-choix { fill: var(--fe-primary-soft); }
+.v-item { font: 500 14px var(--fe-font-heading); fill: var(--fe-text); }
+.v-puce { fill: var(--fe-primary); }
+/* l’animation, 7 s : « / », le menu s’ouvre depuis le curseur, on descend sur Tableau, il se referme, le tableau arrive */
+.vignette-editeur .v-curseur { animation: v-clignote 1s steps(1) infinite; }
+.vignette-editeur .v-slash { animation: v-slash 7s infinite; }
+.vignette-editeur .v-avance { animation: v-avance 7s infinite; }
+.vignette-editeur .v-menu { transform-box: view-box; transform-origin: 127px 142px; animation: v-menu 7s infinite; }
+.vignette-editeur .v-choix { animation: v-choix 7s infinite var(--fe-ease-in-out); }
+.vignette-editeur .v-tableau { animation: v-tableau 7s infinite var(--fe-ease-out); }
+@keyframes v-clignote { 50% { opacity: 0; } }
+@keyframes v-avance { 0%, 13% { transform: none; } 14%, 45% { transform: translateX(11px); } 46%, 100% { transform: none; } }
+@keyframes v-slash { 0%, 13% { opacity: 0; } 14%, 45% { opacity: 1; } 46%, 100% { opacity: 0; } }
+@keyframes v-menu { 0%, 15% { opacity: 0; transform: scale(.92); } 19%, 43% { opacity: 1; transform: none; animation-timing-function: var(--fe-ease-in-out); } 47%, 100% { opacity: 0; transform: scale(.96); } }
+@keyframes v-choix { 0%, 26% { transform: none; } 34%, 100% { transform: translateY(60px); } }
+@keyframes v-tableau { 0%, 47% { opacity: 0; transform: translateY(6px); } 54%, 88% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; transform: none; } }
+/* Outillage IA, dans les couleurs du terminal (charte MaxDS, hooks/pixels.ts), sombre dans les deux thèmes. 16 s :
+   on ajoute la marketplace, on installe max, puis /maxou ouvre le panneau Max à droite. Sans animation, on voit l’état final. */
+.etape .etape-desc + .vignette + .aussi { margin-top: 24px; }
+.vignette-panneau text { font: 500 12px var(--fe-font-code); }
+.vignette-panneau .v-gras { font-weight: 700; }
+.v-ecran { fill: #241d1b; } .v-pane { fill: #2b2320; }
+.v-orange { fill: #fb3e01; } .v-encre { fill: #191312; }
+.v-t-orange { fill: #fb3e01; } .v-t-blanc { fill: #ffffff; } .v-t-gris, .v-cmd text { fill: #7a706d; }
+.v-trait-ecran { stroke: #3a302d; stroke-width: 1.5; } .v-ligne-sel, .v-point { fill: #3a302d; }
+.v-coche { fill: none; stroke: #fb3e01; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.v-curseur-t { fill: #dbd8d7; }
+.v-cache { opacity: 0; } .v-cache1 { --l1: 224px; } .v-cache2 { --l2: 195px; } .v-cache3 { --l3: 44px; }
+.vignette-panneau .v-curseur-t { animation: v-clignote 1s steps(1) infinite; }
+.vignette-panneau .v-seance { animation: v-t-seance 16s infinite; }
+.vignette-panneau .v-panneau { animation: v-t-panneau 16s infinite var(--fe-ease-out); }
+.vignette-panneau .v-l2 { animation: v-t-l2 16s infinite steps(1); } .vignette-panneau .v-l3 { animation: v-t-l3 16s infinite steps(1); }
+.vignette-panneau .v-o1 { animation: v-t-o1 16s infinite steps(1); } .vignette-panneau .v-o2 { animation: v-t-o2 16s infinite steps(1); }
+.vignette-panneau .v-cache1 { animation: v-t-cache1 16s infinite steps(31); }
+.vignette-panneau .v-cache2 { animation: v-t-cache2 16s infinite steps(27); }
+.vignette-panneau .v-cache3 { animation: v-t-cache3 16s infinite steps(6); }
+@keyframes v-t-seance { 0%, 94% { opacity: 1; } 98%, 100% { opacity: 0; } }
+@keyframes v-t-panneau { 0%, 49% { opacity: 0; transform: translateX(16px); } 54%, 100% { opacity: 1; transform: none; } }
+@keyframes v-t-l2 { 0% { opacity: 0; } 23% { opacity: 1; } }
+@keyframes v-t-l3 { 0% { opacity: 0; } 40% { opacity: 1; } }
+@keyframes v-t-o1 { 0% { opacity: 0; } 20% { opacity: 1; } }
+@keyframes v-t-o2 { 0% { opacity: 0; } 36% { opacity: 1; } }
+@keyframes v-t-cache1 { 0%, 3% { opacity: 1; transform: none; } 15%, 19.9% { opacity: 1; transform: translateX(var(--l1)); } 20%, 100% { opacity: 0; transform: translateX(var(--l1)); } }
+@keyframes v-t-cache2 { 0%, 25% { opacity: 1; transform: none; } 33%, 34.9% { opacity: 1; transform: translateX(var(--l2)); } 35%, 100% { opacity: 0; transform: translateX(var(--l2)); } }
+@keyframes v-t-cache3 { 0%, 42% { opacity: 1; transform: none; } 45%, 48.9% { opacity: 1; transform: translateX(var(--l3)); } 49%, 100% { opacity: 0; transform: translateX(var(--l3)); } }
+/* MaxDS CV : un vrai CV MaxDS (mise en page de main) en squelette, au trigramme ABC.
+   Clair : bandeau orange ; sombre : encre et liseré orange. La page défile (12 s). */
+.vignette-cv { --cv-carte: #ffffff; --cv-trait: #e5e5e5; --cv-texte: #191312; --cv-fort: #525252; --cv-moyen: #a3a3a3; --cv-doux: #e5e5e5; --cv-bandeau: #fb3e01; --cv-lisere: transparent; }
+:root[data-theme="dark"] .vignette-cv { --cv-carte: #191312; --cv-trait: #3a3a3a; --cv-texte: #f5f5f5; --cv-fort: #d4d4d4; --cv-moyen: #a3a3a3; --cv-doux: #4a4a4a; --cv-bandeau: #191312; --cv-lisere: #fb3e01; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vignette-cv { --cv-carte: #191312; --cv-trait: #3a3a3a; --cv-texte: #f5f5f5; --cv-fort: #d4d4d4; --cv-moyen: #a3a3a3; --cv-doux: #4a4a4a; --cv-bandeau: #191312; --cv-lisere: #fb3e01; } }
+.v-cv-carte { fill: var(--cv-carte); } .v-cv-bord { fill: none; stroke: var(--cv-trait); stroke-width: 1.5; }
+.v-cv-bandeau { fill: var(--cv-bandeau); } .v-cv-lisere { fill: none; stroke: var(--cv-lisere); stroke-width: 2; }
+.v-cv-logo path { fill: #ffffff; }
+.v-cv-filet { stroke: rgba(255, 255, 255, .25); stroke-width: 1.5; }
+.v-cv-abc { font: 700 24px var(--fe-font-heading); fill: #ffffff; letter-spacing: -.02em; }
+.v-cv-blanc { fill: rgba(255, 255, 255, .9); } .v-cv-blanc-doux { fill: rgba(255, 255, 255, .6); }
+.v-cv-trait { fill: none; stroke: var(--cv-trait); stroke-width: 1.5; }
+.v-cv-pointille { fill: none; stroke: var(--cv-moyen); stroke-opacity: .6; stroke-width: 1.5; stroke-dasharray: 3 3; }
+.v-cv-tenon, .v-cv-picto, .v-cv-marque, .v-cv-point { fill: #fb3e01; }
+.v-cv-marque { stroke: var(--cv-carte); stroke-width: 3; paint-order: stroke; }
+.v-cv-label { font: 700 11px var(--fe-font-heading); fill: var(--cv-texte); letter-spacing: .08em; }
+.v-cv-titre { fill: var(--cv-fort); } .v-cv-texte, .v-cv-date { fill: var(--cv-moyen); } .v-cv-doux { fill: var(--cv-doux); }
+.v-cv-tag { fill: none; stroke: var(--cv-trait); stroke-width: 1.5; }
+.vignette-cv .v-cv-defile { animation: v-cv-defile 12s infinite var(--fe-ease-in-out); }
+@keyframes v-cv-defile { 0%, 20% { transform: none; } 32%, 55% { transform: translateY(-130px); } 67%, 85% { transform: translateY(-266px); } 97%, 100% { transform: none; } }
+/* etourneau : la planche de naturaliste de la page de la marque, en grand dans la scène. L’oiseau sur sa branche, sa
+   légende dessous ; la légende de l’étape fait bouger chaque partie (planche.js). La nuée du site
+   se pose sur la branche, et remplit l’oiseau pour la partie iv (scenes.js). */
+.planche { position: absolute; inset: 0; display: flex; flex-direction: column; margin: 0; opacity: 0; visibility: hidden; transition: opacity var(--fe-duration-medium) var(--fe-ease-out), visibility 0s var(--fe-duration-medium); }
+.recit:has(.etape[data-forme="etourneau"].actif) .scene-nuee .planche { opacity: 1; visibility: visible; transition: opacity var(--fe-duration-medium) var(--fe-ease-out); }
+.etape-scene .planche { position: relative; height: 100%; opacity: 1; visibility: visible; }
+.planche-dessin { flex: 1; min-height: 0; width: 100%; overflow: visible; }
+.planche figcaption { padding-top: 8px; text-align: center; font: 500 12px var(--fe-font-code); color: var(--fe-text-muted); }
+.planche figcaption i { font: italic 400 14px var(--fe-font-heading); color: var(--fe-text); }
+.planche-specimen { overflow: visible; }
+.planche-branche { fill: none; stroke: var(--fe-text); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+/* la légende, dans l’étape : un chiffre romain, un nom, un paquet ; la partie choisie a le fond violet léger */
+.planche-legende { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; max-width: 520px; }
+/* le fond de la partie choisie glisse d’une tuile à l’autre, comme la pilule des onglets de la page de la marque */
+.planche-pilule { position: absolute; top: 0; left: 0; border-radius: var(--fe-radius-md); background: var(--fe-primary-soft); opacity: 0; pointer-events: none; transition: transform var(--fe-duration-short) var(--fe-ease-in-out), width var(--fe-duration-short) var(--fe-ease-in-out), height var(--fe-duration-short) var(--fe-ease-in-out), opacity var(--fe-duration-flash) var(--fe-ease-out); }
+.planche-pilule.instant { transition: none; }
+.planche-partie { position: relative; display: grid; grid-template-columns: 2.4em minmax(0, 1fr); justify-items: start; min-height: 44px; padding: 8px 12px 8px 8px; border: 0; border-radius: var(--fe-radius-md); background: none; color: var(--fe-text); font: inherit; text-align: left; cursor: pointer; transition: background-color var(--fe-duration-flash) var(--fe-ease-out), transform var(--fe-duration-short) var(--fe-ease-out); }
+.planche-partie .planche-num { grid-row: span 2; justify-self: end; padding-right: 8px; font: 500 14px/1.5 var(--fe-font-code); color: var(--fe-accent); }
+.planche-partie b { font-size: 16px; line-height: 1.3; }
+.planche-partie code { font: 500 12px var(--fe-font-code); color: var(--fe-text-muted); }
+.planche-partie:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) { .planche-partie:not([aria-pressed="true"]):hover { background: var(--fe-surface-2); } }
+/* sous les tuiles, la fiche de la partie choisie : toutes dans la même case, la plus longue donne la hauteur, rien ne saute */
+.planche-fiches { display: grid; max-width: 520px; }
+.planche-fiche { grid-area: 1 / 1; visibility: hidden; }
+.planche-fiche.active { visibility: visible; animation: planche-fiche var(--fe-duration-short) var(--fe-ease-out); }
+@keyframes planche-fiche { from { opacity: 0; transform: translateY(6px); } }
+.planche-fiche p { margin: 0; font-size: 16px; line-height: 1.5; color: var(--fe-text-muted); }
+.planche-fiche p code { font: 500 14px var(--fe-font-code); color: var(--fe-text); }
+.planche-fiche > code { display: inline-block; margin-top: 8px; font: 500 13px var(--fe-font-code); color: var(--fe-text); }
+.etape .etape-desc + .planche-legende { margin-top: 24px; }
+.etape .planche-legende + .planche-fiches { margin-top: 16px; }
+.etape .planche-fiches + .etape-chiffre { margin-top: 24px; }
+@media (max-width: 520px) { .planche-legende { grid-template-columns: 1fr; } }
+.planche-specimen :is(.fe-corps, .fe-aile, .fe-ventre, .fe-reflet, .fe-bec) { transition: fill-opacity var(--fe-duration-medium) var(--fe-ease-out); }
+/* i : la silhouette se dessine, les couleurs s’effacent puis reviennent */
+.planche-contour { fill: none; stroke: var(--fe-text); stroke-width: 1.4; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: 0; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.planche[data-part="brand"] .planche-contour { animation: planche-trace 2.6s var(--fe-ease-in-out) forwards; }
+.planche[data-part="brand"] .planche-specimen :is(.fe-corps, .fe-aile, .fe-ventre, .fe-reflet, .fe-bec, .fe-oeil) { animation: planche-efface 2.6s var(--fe-ease-in-out) forwards; }
+@keyframes planche-trace { 0% { opacity: 1; stroke-dashoffset: 1; } 60% { stroke-dashoffset: 0; } 100% { opacity: 1; stroke-dashoffset: 0; } }
+@keyframes planche-efface { 0%, 100% { fill-opacity: 1; } 15%, 65% { fill-opacity: 0; } }
+/* ii : l’oiseau part sans couleur, puis chaque token colore sa partie */
+@keyframes planche-teinte { from { fill: var(--fe-surface-2); } }
+@keyframes planche-guide { 0%, 70% { opacity: .5; stroke-dashoffset: 0; } 100% { opacity: 0; stroke-dashoffset: 0; } }
+.planche[data-part="tokens"] .planche-contour { animation: planche-guide 2.2s var(--fe-ease-out) forwards; }
+.planche[data-part="tokens"] .fe-corps { animation: planche-teinte var(--fe-duration-long) var(--fe-ease-out) .15s both; }
+.planche[data-part="tokens"] .fe-aile { animation: planche-teinte var(--fe-duration-long) var(--fe-ease-out) .6s both; }
+.planche[data-part="tokens"] :is(.fe-ventre, .fe-reflet) { animation: planche-teinte var(--fe-duration-long) var(--fe-ease-out) 1.05s both; }
+.planche[data-part="tokens"] .fe-bec { animation: planche-teinte var(--fe-duration-long) var(--fe-ease-out) 1.5s both; }
+/* iii : l’épaule et l’arc que suit le bout de l’aile */
+.planche-pivot { fill: none; stroke: var(--fe-accent); stroke-width: 1.5; stroke-dasharray: 4 5; vector-effect: non-scaling-stroke; opacity: 0; transition: opacity var(--fe-duration-medium) var(--fe-ease-out); }
+.planche-pivot-point { fill: var(--fe-accent); opacity: 0; transition: opacity var(--fe-duration-medium) var(--fe-ease-out); }
+.planche[data-part="starling"] :is(.planche-pivot, .planche-pivot-point) { opacity: 1; }
+/* iv : l’oiseau dessiné s’efface devant la nuée, qui prend sa forme */
+.planche[data-part="murmuration"] .planche-specimen :is(.fe-corps, .fe-aile, .fe-ventre, .fe-reflet, .fe-bec, .fe-oeil, .fe-pattes) { fill-opacity: .08; stroke-opacity: .2; }
+.planche[data-part="murmuration"] .planche-contour { opacity: .5; stroke-dashoffset: 0; transition: opacity var(--fe-duration-medium) var(--fe-ease-out); }
+/* l’arrivée sur l’étape : la nuée dessine seule l’oiseau ; puis, pendant qu’elle s’évapore, la silhouette se trace,
+   les couleurs reviennent */
+.planche[data-arrivee="nuee"] .planche-specimen :is(.fe-corps, .fe-aile, .fe-ventre, .fe-reflet, .fe-bec, .fe-oeil) { fill-opacity: 0; transition: none; }
+.planche[data-arrivee="nuee"] .planche-specimen .fe-pattes { stroke-opacity: 0; }
+.planche[data-arrivee="dessin"][data-part="brand"] .planche-specimen :is(.fe-corps, .fe-aile, .fe-ventre, .fe-reflet, .fe-bec, .fe-oeil) { animation: planche-revient 2.8s var(--fe-ease-in-out) both; }
+.planche[data-arrivee="dessin"][data-part="brand"] .planche-specimen .fe-pattes { animation: planche-revient-trait 2.8s var(--fe-ease-in-out) both; }
+@keyframes planche-revient { 0%, 45% { fill-opacity: 0; } 100% { fill-opacity: 1; } }
+@keyframes planche-revient-trait { 0%, 45% { stroke-opacity: 0; } 100% { stroke-opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  /* les vignettes et la planche se jouent par des règles plus précises que ces jokers : sans !important, elles gagneraient */
+  .vignette-panneau *, .vignette-cv *, .planche * { animation: none !important; }
+  .planche-partie:active { transform: none; }
+  .planche-pilule { transition: none; }
+  .planche-fiche.active { animation: none; }
+  .vignette-editeur .v-curseur, .vignette-editeur .v-avance, .vignette-editeur .v-slash, .vignette-editeur .v-menu, .vignette-editeur .v-choix, .vignette-editeur .v-tableau { animation: none; }
+  .vignette-editeur .v-tableau { opacity: 0; }
+  .vignette-editeur .v-choix { transform: translateY(60px); }
+  .vignette-editeur .v-avance { transform: translateX(11px); }
+  .planche[data-part="brand"] .planche-contour { opacity: 1; stroke-dashoffset: 0; }
+
+}
 .aussi { font-size: 14px; color: var(--fe-text-muted); }
 .aussi a { font-weight: 700; color: var(--fe-text); text-decoration-color: var(--fe-primary); }
 .aussi a:hover { color: var(--fe-primary); }
@@ -218,9 +378,12 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .etape .etape-type + h3 { margin-top: 8px; }
 .etape h3 + .etape-desc, .etape h3 + .etape-citation, .etape .etape-citation + .etape-desc { margin-top: 12px; }
 .etape .etape-points { margin-top: 24px; }
-.etape .etape-points + *, .etape .etape-desc + .etiquettes { margin-top: 24px; }
-.etape .etape-tags + .etape-lien, .etape .etape-tags + .aussi { margin-top: 8px; }
-.etape .etape-lien + .aussi { margin-top: 32px; }
+.etape .etape-points + * { margin-top: 24px; }
+.etape .boutons + .aussi { margin-top: 32px; }
+.etape .etape-desc + .vignette { margin-top: 28px; }
+.etape .vignette + .etiquettes { margin-top: 20px; }
+.etape .vignette + .etape-chiffre { margin-top: 20px; }
+.etape .etape-chiffre + .boutons { margin-top: 20px; }
 @media (max-width: 860px) {
   .recit { grid-template-columns: 1fr; gap: 0; }
   .scene-nuee { display: none; }

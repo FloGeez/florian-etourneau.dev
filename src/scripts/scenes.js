@@ -12,7 +12,7 @@ const souris = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const css = (n) => getComputedStyle(root).getPropertyValue(n).trim();
 const debug = new URLSearchParams(location.search).has('debug');
 
-export function initNuee({ scene, VB, seuilEnvol }) {
+export function initNuee({ scene, VB, seuilEnvol }, planche) {
   const couleurs = () => [css('--fe-birds'), css('--fe-birds'), css('--fe-birds-2')];
   const nuee = createMurmuration(document.getElementById('nuee'), { count: innerWidth <= 860 ? 200 : 320, colors: couleurs(), debug });
   initTheme(() => nuee.setColors(couleurs()));
@@ -33,7 +33,8 @@ export function initNuee({ scene, VB, seuilEnvol }) {
   // Où dessiner : la grande scène collée (bureau) ou l’emplacement réservé au-dessus de l’étape (mobile)
   const zoneForme = () => (innerWidth <= 860 ? actif.querySelector('.etape-scene') : perchoir);
   const origine = (el) => () => { const r = el.getBoundingClientRect(); return [r.left + scrollX, r.top + scrollY]; };
-  // les formes du récit viennent de @etourneau/murmuration (data-forme : work, maxds, editor, basket), partagées avec la charte
+  // les formes du récit viennent de @etourneau/murmuration (data-forme : work, maxds, cv, editor, basket), partagées avec la charte ;
+  // l’étape etourneau n’a pas de forme : la nuée se pose sur la planche (planche.js), sur la branche ou dans l’oiseau
   const pointsForme = (nom, el) => fitShape(sampleShape(shapes[nom], nbForme()), el.getBoundingClientRect(), { zoom: innerWidth <= 860 ? 1.1 : 1.08, dy: 6 });
   const lignes = [...document.querySelectorAll('.parcours li[data-annees]')];
   const pointsParcours = () => {
@@ -53,6 +54,9 @@ export function initNuee({ scene, VB, seuilEnvol }) {
     const centre = (innerHeight + 68) / 2;
     let m = actif, dm = 1e9;
     etapes.forEach((e) => { const r = e.getBoundingClientRect(), d = Math.abs((r.top + r.bottom) / 2 - centre); if (d < dm) { dm = d; m = e; } });
+    // un focus clavier visible à l’écran garde son étape, même quand elle est trop haute pour être centrée (mobile)
+    const f = document.activeElement, ef = f && f.closest && f.closest('.etape');
+    if (ef && f.matches(':focus-visible')) { const r = f.getBoundingClientRect(); if (r.top >= 68 && r.bottom <= innerHeight) m = ef; }
     if (m !== actif) { actif = m; etapes.forEach((e) => e.classList.toggle('actif', e === m)); }
   };
   // Au clavier (focus visible, pas un clic de souris) : le focus qui entre dans une étape la centre, pour que la nuée dessine son picto ;
@@ -68,11 +72,12 @@ export function initNuee({ scene, VB, seuilEnvol }) {
 
   const formeActive = () => {
     const f = actif.dataset.forme.split(' ');
+    if (f[0] === 'etourneau') return planche.variante();
     return f.length > 1 && !reduit ? f[Math.floor(performance.now() / 3500) % f.length] : f[0];
   };
   // Prépare les formes pendant les temps morts, pour que la nuée parte sans à-coup
   const aLoisir = window.requestIdleCallback || ((f) => setTimeout(f, 200));
-  const formesRecit = [...new Set(etapes.flatMap((e) => e.dataset.forme.split(' ')))];
+  const formesRecit = [...new Set(etapes.flatMap((e) => e.dataset.forme.split(' ')))].filter((n) => shapes[n]);
   const prechauffer = () => formesRecit.forEach((n, i) => aLoisir(() => sampleShape(shapes[n], nbForme()), { timeout: 2000 + i * 300 }));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(prechauffer); else prechauffer();
   // Où tourne l’essaim des oiseaux sans place, section par section — jamais sur le texte
@@ -84,6 +89,8 @@ export function initNuee({ scene, VB, seuilEnvol }) {
     return ellipse(s.left + s.width * 0.5, s.top + s.height * 0.1, s.width * 0.3, s.height * 0.08);
   };
   const orbiteForme = (el) => () => { const r = el.getBoundingClientRect(); return ellipse(r.left + r.width / 2, r.top - 12, r.width * 0.3, 22); };
+  // au-dessus de la planche, plus large et plus haut : la nuée évaporée tourne sans couvrir l’oiseau
+  const orbitePlanche = (el) => () => { const r = el.getBoundingClientRect(); return ellipse(r.left + r.width / 2, r.top - 24, r.width * 0.42, 40); };
   // Parcours : l’essaim va et vient le long d’un L, jamais sur la liste : au-dessus d’elle, à droite du titre
   // « parcours », puis dans la marge droite, sur la hauteur de l’écran. Quand le haut de la liste est passé, il ne reste que la marge.
   const ESSAIM_PARCOURS = 40;
@@ -122,7 +129,12 @@ export function initNuee({ scene, VB, seuilEnvol }) {
       name: 'forme',
       active: () => { const r = recit.getBoundingClientRect(); return r.top < vh() * 0.55 && r.bottom > vh() * 0.6; },
       variant: formeActive,
-      pose: ({ variant }) => { const el = zoneForme(); return { points: pointsForme(variant, el), anchor: origine(el), rest: 'circle', zone: orbiteForme(el), shy: souris }; },
+      pose: ({ variant }) => {
+        // la planche : la nuée remplit l’oiseau (chaque oiseau par son milieu, pour couvrir le dessin exactement), ou s’évapore
+        // au-dessus et laisse quelques oiseaux sur la branche ; elle reste entière, pour que l’étape suivante parte d’elle
+        if (variant.startsWith('etourneau')) { const el = planche.element, sur = variant === 'etourneau'; return { points: planche.points(nbForme()), anchor: origine(el), rest: 'circle', zone: sur ? orbitePlanche(el) : orbiteForme(el), centred: !sur, shy: souris }; }
+        const el = zoneForme(); return { points: pointsForme(variant, el), anchor: origine(el), rest: 'circle', zone: orbiteForme(el), shy: souris };
+      },
     },
     // le parcours : un oiseau posé = deux mois ; un petit essaim dans la marge de droite s’il y en a une, les autres quittent l’écran
     {
@@ -143,6 +155,8 @@ export function initNuee({ scene, VB, seuilEnvol }) {
     const recaler = new ResizeObserver(() => { if (moteur.scene === 'contact') moteur.update(true); });
     ['copier', 'ecrire'].forEach((id) => { const el = document.getElementById(id); if (el) recaler.observe(el); });
   }
+  // une partie choisie sur la planche : la nuée change de place tout de suite
+  planche.quandChange = () => moteur.update();
   addEventListener('resize', () => { majEtape(); moteur.update(true); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moteur.update(true));
   majEtape(); moteur.update(true);
