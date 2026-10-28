@@ -342,10 +342,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
 .planche[data-part="tokens"] .fe-aile { animation: planche-teinte var(--fe-duration-long) var(--fe-ease-out) .6s both; }
 .planche[data-part="tokens"] :is(.fe-ventre, .fe-reflet) { animation: planche-teinte var(--fe-duration-long) var(--fe-ease-out) 1.05s both; }
 .planche[data-part="tokens"] .fe-bec { animation: planche-teinte var(--fe-duration-long) var(--fe-ease-out) 1.5s both; }
-/* iii : l’épaule et l’arc que suit le bout de l’aile */
-.planche-pivot { fill: none; stroke: var(--fe-accent); stroke-width: 1.5; stroke-dasharray: 4 5; vector-effect: non-scaling-stroke; opacity: 0; transition: opacity var(--fe-duration-medium) var(--fe-ease-out); }
-.planche-pivot-point { fill: var(--fe-accent); opacity: 0; transition: opacity var(--fe-duration-medium) var(--fe-ease-out); }
-.planche[data-part="starling"] :is(.planche-pivot, .planche-pivot-point) { opacity: 1; }
+/* iii : la promenade sur la branche (planche.js) */
 /* iv : l’oiseau dessiné s’efface devant la nuée, qui prend sa forme */
 .planche[data-part="murmuration"] .planche-specimen :is(.fe-corps, .fe-aile, .fe-ventre, .fe-reflet, .fe-bec, .fe-oeil, .fe-pattes) { fill-opacity: .08; stroke-opacity: .2; }
 .planche[data-part="murmuration"] .planche-contour { opacity: .5; stroke-dashoffset: 0; transition: opacity var(--fe-duration-medium) var(--fe-ease-out); }
