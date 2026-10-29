@@ -1,8 +1,8 @@
 /* Le tir : à toi de jouer. L’aile lève le ballon ; on tire vers l’arrière, on vise, on lâche.
    Le tableau d’affichage compte les paniers, les tirs et les 24 secondes.
-   L’oiseau est articulé (@etourneau/starling) : la même aile passe de pliée à levée par l’avant, sans jamais
+   L’oiseau est articulé (etourneau/starling) : la même aile passe de pliée à levée par l’avant, sans jamais
    passer derrière le corps ; la tête suit le ballon pendant qu’il vole. */
-import { wing, wingPoints, WING_TIP, wingOverlayOpacity, headTransform, beakOpacities, HEAD_DURATION, DURATIONS, easings, clamp, lerp, progress, rotatePoint, perchedBody, perchedLegs, PERCHED, animate, createFlap } from '@etourneau/starling';
+import { wing, wingPoints, WING_TIP, wingOverlayOpacity, headTransform, beakOpacities, HEAD_DURATION, DURATIONS, easings, clamp, lerp, progress, rotatePoint, perchedBody, perchedLegs, PERCHED, animate, createFlap } from 'etourneau/starling';
 
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

@@ -5,12 +5,12 @@ import { cpSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname } from 'node:path';
 
-// Les favicons viennent de @etourneau/brand : recopiés dans public/favicon (ignoré par git) au lancement du dev et du build.
+// Les favicons viennent de etourneau : recopiés dans public/favicon (ignoré par git) au lancement du dev et du build.
 const favicons = {
   name: 'favicons',
   hooks: {
     'astro:config:setup': () => {
-      const source = dirname(createRequire(import.meta.url).resolve('@etourneau/brand/favicon/favicon.svg'));
+      const source = dirname(createRequire(import.meta.url).resolve('etourneau/favicon/favicon.svg'));
       cpSync(source, 'public/favicon', { recursive: true, filter: (f) => !f.endsWith('.html') });
     },
   },

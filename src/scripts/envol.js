@@ -1,6 +1,6 @@
 /* L’envol de Florian, avec la nuée. Le vol suit le sens de lecture : l’oiseau décolle, puis plonge vers la suite de la page
    (en bas à droite de l’écran). Le trajet est défini à l’écran, puis ramené dans les coordonnées de la scène. */
-import { easings, clamp, lerp, placeFlying, createFlap } from '@etourneau/starling';
+import { easings, clamp, lerp, placeFlying, createFlap } from 'etourneau/starling';
 
 const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const bez = (P, u) => { const a = 1 - u; return [0, 1].map((k) => a * a * a * P[0][k] + 3 * a * a * u * P[1][k] + 3 * a * u * u * P[2][k] + u * u * u * P[3][k]); };

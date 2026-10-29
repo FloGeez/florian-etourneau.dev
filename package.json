@@ -14,12 +14,9 @@
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.11",
-    "@etourneau/brand": "^0.2.1",
-    "@etourneau/murmuration": "^0.2.1",
-    "@etourneau/starling": "^0.2.1",
-    "@etourneau/tokens": "^0.2.1",
     "altcha-lib": "^2.5.0",
-    "astro": "^7.3.0"
+    "astro": "^7.3.0",
+    "etourneau": "^1.0.0"
   },
   "engines": {
     "node": ">=22.12.0"

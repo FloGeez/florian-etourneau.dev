@@ -1,4 +1,4 @@
-/* Florian Etourneau — site. Les tokens viennent de @etourneau/tokens (tokens.css), importé avant ce fichier. */
+/* Florian Etourneau — site. Les tokens viennent de etourneau (tokens.css), importé avant ce fichier. */
 :root {
   /* alias du site */
   --gouttiere: var(--fe-page-gutter);

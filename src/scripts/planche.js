@@ -2,8 +2,8 @@
    de l’étape. Chaque partie est un paquet ; la choisir la fait bouger : la silhouette se dessine
    (brand), le plumage prend ses couleurs (tokens), l’oiseau se promène sur la branche (starling), et la nuée du site
    quitte la branche pour prendre la forme de l’oiseau (murmuration). Où se pose la nuée : scenes.js, par points() et variante(). */
-import { easings, lerp, progress, bump, perchedBody, perchedLegs, headTransform, beakOpacities, HEAD_DURATION, PERCHED, animate } from '@etourneau/starling';
-import { shapes, sampleShape } from '@etourneau/murmuration';
+import { easings, lerp, progress, bump, perchedBody, perchedLegs, headTransform, beakOpacities, HEAD_DURATION, PERCHED, animate } from 'etourneau/starling';
+import { shapes, sampleShape } from 'etourneau/murmuration';
 import { brancheY, surPlanche } from './planche-geometrie.js';
 
 const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -34,7 +34,7 @@ export function initPlanche() {
   const placer = () => (petit.matches ? etape.querySelector('.etape-scene') : document.querySelector('.scene-nuee')).append(planche);
   placer(); petit.addEventListener('change', placer);
 
-  /* iii : la promenade, comme dans la démo de @etourneau/starling. L’étourneau marche, il ne sautille pas : les pieds restent
+  /* iii : la promenade, comme dans la démo de etourneau/starling. L’étourneau marche, il ne sautille pas : les pieds restent
      plantés pendant que le corps avance, la jambe plie au talon. Quelques pas à droite, il regarde derrière lui (la tête
      tourne seule, comme à l’accueil), fait demi-tour en suivant son regard, revient, se retourne. Dans le repère de l’oiseau (viewBox 40 24 140 176) ; choisir une autre partie le ramène vite à sa place. */
   const { smooth, inOut } = easings;
