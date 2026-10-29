@@ -1,4 +1,4 @@
-/* Florian Etourneau — site. Les tokens viennent de etourneau (tokens.css), importé avant ce fichier. */
+/* Florian Etourneau — site. Les tokens viennent du paquet etourneau (tokens.css), importé avant ce fichier. */
 :root {
   /* alias du site */
   --gouttiere: var(--fe-page-gutter);
@@ -212,6 +212,8 @@ h1 .deux { color: var(--fe-primary); display: block; }
 /* un projet : sa vignette dessinée, ses boutons */
 .vignette { display: block; width: 100%; max-width: 520px; height: auto; overflow: visible; }
 .etape-chiffre a { color: inherit; text-decoration-color: currentColor; }
+/* le logo npm devant un lien npm, dans la couleur de la ligne, comme ceux de GitHub et LinkedIn dans l’en-tête */
+.ic-npm { display: inline-block; width: 13px; height: 13px; margin-right: 7px; vertical-align: -1px; background-color: currentColor; -webkit-mask: url('/icons/npm.svg') center / contain no-repeat; mask: url('/icons/npm.svg') center / contain no-repeat; }
 .boutons { display: flex; flex-wrap: wrap; gap: 12px; }
 .bouton { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 20px; border-radius: var(--fe-radius-md); border: 1.5px solid var(--fe-border); color: var(--fe-text); font-weight: 700; font-size: 16px; text-decoration: none; transition: border-color var(--fe-duration-short), background-color var(--fe-duration-short); }
 .bouton:hover { border-color: var(--fe-primary); }

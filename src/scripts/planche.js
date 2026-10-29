@@ -34,7 +34,7 @@ export function initPlanche() {
   const placer = () => (petit.matches ? etape.querySelector('.etape-scene') : document.querySelector('.scene-nuee')).append(planche);
   placer(); petit.addEventListener('change', placer);
 
-  /* iii : la promenade, comme dans la démo de etourneau/starling. L’étourneau marche, il ne sautille pas : les pieds restent
+  /* iii : la promenade, comme dans la démo d’etourneau/starling. L’étourneau marche, il ne sautille pas : les pieds restent
      plantés pendant que le corps avance, la jambe plie au talon. Quelques pas à droite, il regarde derrière lui (la tête
      tourne seule, comme à l’accueil), fait demi-tour en suivant son regard, revient, se retourne. Dans le repère de l’oiseau (viewBox 40 24 140 176) ; choisir une autre partie le ramène vite à sa place. */
   const { smooth, inOut } = easings;
