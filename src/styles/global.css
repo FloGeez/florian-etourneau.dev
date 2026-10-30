@@ -248,7 +248,7 @@ h1 .deux { color: var(--fe-primary); display: block; }
 @keyframes v-tableau { 0%, 47% { opacity: 0; transform: translateY(6px); } 54%, 88% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; transform: none; } }
 /* Outillage IA, dans les couleurs du terminal (charte MaxDS, hooks/pixels.ts), sombre dans les deux thèmes. 16 s :
    on ajoute la marketplace, on installe max, puis /maxou ouvre le panneau Max à droite. Sans animation, on voit l’état final. */
-.etape .etape-desc + .vignette + .aussi { margin-top: 24px; }
+.etape .vignette + .aussi { margin-top: 24px; }
 .vignette-panneau text { font: 500 12px var(--fe-font-code); }
 .vignette-panneau .v-gras { font-weight: 700; }
 .v-ecran { fill: #241d1b; } .v-pane { fill: #2b2320; }
